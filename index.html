@@ -4,273 +4,197 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Multi-Timeframe Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 20px;
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'spin': 'spin 1s linear infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                    }
+                }
+            }
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .symbol-input {
-            padding: 10px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            min-width: 200px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            background-color: #4299e1;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #3182ce;
-        }
-
-        .timeframes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .timeframe-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .timeframe-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d8, #96ceb4);
-        }
-
-        .timeframe-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .timeframe-title {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .timeframe-symbol {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .price-display {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .signal-indicator {
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .signal-bullish {
-            background-color: rgba(72, 187, 120, 0.2);
-            color: #48bb78;
-        }
-
-        .signal-bearish {
-            background-color: rgba(245, 101, 101, 0.2);
-            color: #f56565;
-        }
-
-        .signal-reversal {
-            background-color: rgba(237, 137, 54, 0.2);
-            color: #ed8936;
-        }
-
-        .indicator-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .indicator-value {
-            font-weight: bold;
-        }
-
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 4px solid white;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .status-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .status-live {
-            background-color: rgba(72, 187, 120, 0.2);
-            color: #48bb78;
-        }
-
-        .status-updating {
-            background-color: rgba(237, 137, 54, 0.2);
-            color: #ed8936;
-        }
-
-        .error-container {
-            background-color: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #ef4444;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .no-data {
-            text-align: center;
-            color: #64748b;
-            margin-top: 50px;
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <div class="container" x-data="cryptoAnalyzer()" x-init="init()">
-        <div class="header">
-            <h1>Crypto Multi-Timeframe Analysis</h1>
-            <p>Real-time signals across 1m, 5m, and 15m timeframes</p>
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-7xl" x-data="cryptoAnalyzer()" x-init="init()">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-gray-800 mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Crypto Multi-Timeframe Analysis
+            </h1>
+            <p class="text-xl text-gray-600">Real-time signals across 1m, 5m, and 15m timeframes</p>
         </div>
 
-        <div class="controls">
-            <input
-                type="text"
-                x-model="symbol"
-                placeholder="Enter symbol (e.g., BTCUSDT)"
-                class="symbol-input"
-                @keyup.enter="updateData()"
+        <!-- Controls -->
+        <div class="flex flex-wrap justify-center items-center gap-4 mb-8">
+            <div class="relative" x-data="{ open: false }">
+                <div class="flex gap-2">
+                    <input
+                        type="text"
+                        x-model="symbol"
+                        placeholder="Enter symbol (e.g., BTCUSDT)"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg min-w-[250px] transition-all"
+                        @keyup.enter="updateData()"
+                    >
+                    <button 
+                        @click="open = !open"
+                        class="px-4 py-3 bg-gray-100 border-2 border-l-0 border-gray-200 rounded-r-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        <i class="fas fa-chevron-down text-gray-600"></i>
+                    </button>
+                </div>
+                
+                <!-- Dropdown Menu -->
+                <div 
+                    x-show="open" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 transform scale-95"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-95"
+                    @click.away="open = false"
+                    class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[200px]"
+                >
+                    <div class="py-2">
+                        <div class="px-4 py-2 text-sm text-gray-500 font-semibold border-b border-gray-100">
+                            Popular Symbols
+                        </div>
+                        <template x-for="crypto in popularCryptos" :key="crypto.symbol">
+                            <button
+                                @click="symbol = crypto.symbol + 'USDT'; open = false; updateData()"
+                                class="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors flex items-center justify-between group"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm"
+                                         :style="`background: ${crypto.color}`">
+                                        <span x-text="crypto.symbol.substring(0, 3)"></span>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-gray-800" x-text="crypto.symbol"></div>
+                                        <div class="text-sm text-gray-500" x-text="crypto.name"></div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-400 group-hover:text-blue-600 transition-colors">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                            </button>
+                        </template>
+                        <div class="px-4 py-2 text-sm text-gray-500 font-semibold border-t border-gray-100 mt-2">
+                            Quick Pairs
+                        </div>
+                        <template x-for="pair in quickPairs" :key="pair">
+                            <button
+                                @click="symbol = pair; open = false; updateData()"
+                                class="w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors text-sm text-gray-700 hover:text-blue-600"
+                                x-text="pair"
+                            ></button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <button 
+                @click="updateData()" 
+                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+                :disabled="isLoading"
             >
-            <button class="btn" @click="updateData()">Update Data</button>
-            <button class="btn" @click="testBinanceDirect()" style="background-color: #d69e2e;">Test API Connection</button>
+                <i class="fas fa-sync-alt" :class="{ 'animate-spin': isLoading }"></i>
+                Update Data
+            </button>
+            <button 
+                @click="testBinanceDirect()" 
+                class="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+            >
+                Test API Connection
+            </button>
         </div>
 
-        <div x-show="showError" class="error-container">
-            <div class="flex items-start">
-                <i class="fas fa-exclamation-triangle mr-2 mt-1"></i>
+        <!-- Error Message -->
+        <div x-show="showError" x-transition class="mb-8">
+            <div class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg flex items-start gap-3">
+                <i class="fas fa-exclamation-triangle mt-1 flex-shrink-0"></i>
                 <div>
-                    <strong>Error:</strong> <span x-text="errorMessage"></span>
+                    <strong class="font-semibold">Error:</strong>
+                    <span x-text="errorMessage" class="ml-1"></span>
                 </div>
             </div>
         </div>
 
-        <div class="loading-spinner" x-show="isLoading">
-            <div class="spinner"></div>
-            <p>Loading data...</p>
+        <!-- Loading Spinner -->
+        <div x-show="isLoading" x-transition class="text-center py-12">
+            <div class="inline-flex items-center justify-center w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <p class="text-gray-600 text-lg">Loading data...</p>
         </div>
 
-        <div class="timeframes-grid" x-show="!isLoading && hasData">
+        <!-- Timeframes Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-show="!isLoading && hasData">
             <template x-for="(tf, index) in timeframes" :key="index">
-                <div class="timeframe-card">
-                    <div class="status-badge" :class="tf.status === 'live' ? 'status-live' : 'status-updating'" x-text="tf.status"></div>
-
-                    <div class="timeframe-header">
-                        <div class="timeframe-title" x-text="tf.name"></div>
-                        <div class="timeframe-symbol" x-text="symbol"></div>
+                <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] relative overflow-hidden">
+                    <!-- Top gradient bar -->
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 via-blue-400 to-green-400"></div>
+                    
+                    <!-- Status Badge -->
+                    <div class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm"
+                         :class="tf.status === 'live' ? 'bg-green-500/20 text-green-200' : 'bg-amber-500/20 text-amber-200'"
+                         x-text="tf.status">
                     </div>
 
-                    <div class="price-display" x-text="'$' + tf.price.toFixed(2)"></div>
+                    <!-- Header -->
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-1" x-text="tf.name"></h3>
+                            <p class="text-white/70 text-sm" x-text="symbol"></p>
+                        </div>
+                    </div>
 
-                    <div class="signal-indicator" :class="'signal-' + tf.signal.toLowerCase()">
-                        <i :class="getSignalIcon(tf.signal)" class="fas mr-2"></i>
+                    <!-- Price Display -->
+                    <div class="text-4xl font-bold text-white mb-4" x-text="'$' + tf.price.toFixed(2)"></div>
+
+                    <!-- Signal Indicator -->
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 backdrop-blur-sm text-sm font-semibold"
+                         :class="{
+                             'bg-green-500/20 text-green-200': tf.signal.toLowerCase() === 'bullish',
+                             'bg-red-500/20 text-red-200': tf.signal.toLowerCase() === 'bearish',
+                             'bg-amber-500/20 text-amber-200': tf.signal.toLowerCase() === 'reversal'
+                         }">
+                        <i class="fas" :class="getSignalIcon(tf.signal)"></i>
                         <span x-text="tf.signal"></span>
                     </div>
 
-                    <div class="indicators">
-                        <div class="indicator-row">
-                            <span>RSI:</span>
-                            <span class="indicator-value" x-text="tf.rsi !== null ? tf.rsi.toFixed(1) : '-'"></span>
+                    <!-- Indicators -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-white/80 text-sm">
+                            <span class="font-medium">RSI:</span>
+                            <span class="font-bold" x-text="tf.rsi !== null ? tf.rsi.toFixed(1) : '-'"></span>
                         </div>
-                        <div class="indicator-row">
-                            <span>MACD:</span>
-                            <span class="indicator-value" x-text="tf.macd !== null ? tf.macd.toFixed(3) : '-'"></span>
+                        <div class="flex justify-between items-center text-white/80 text-sm">
+                            <span class="font-medium">MACD:</span>
+                            <span class="font-bold" x-text="tf.macd !== null ? tf.macd.toFixed(3) : '-'"></span>
                         </div>
-                        <div class="indicator-row">
-                            <span>EMA 20:</span>
-                            <span class="indicator-value" x-text="tf.ema20 !== null ? '$' + tf.ema20.toFixed(2) : '-'"></span>
+                        <div class="flex justify-between items-center text-white/80 text-sm">
+                            <span class="font-medium">EMA 20:</span>
+                            <span class="font-bold" x-text="tf.ema20 !== null ? '$' + tf.ema20.toFixed(2) : '-'"></span>
                         </div>
-                        <div class="indicator-row">
-                            <span>Volume:</span>
-                            <span class="indicator-value" x-text="formatNumber(tf.volume)"></span>
+                        <div class="flex justify-between items-center text-white/80 text-sm">
+                            <span class="font-medium">Volume:</span>
+                            <span class="font-bold" x-text="formatNumber(tf.volume)"></span>
                         </div>
                     </div>
                 </div>
             </template>
         </div>
 
-        <div class="no-data" x-show="!isLoading && !hasData && !showError">
-            <p>No data available. Please enter a valid symbol and click Update.</p>
+        <!-- No Data State -->
+        <div x-show="!isLoading && !hasData && !showError" class="text-center py-12">
+            <div class="text-gray-400 mb-4">
+                <i class="fas fa-chart-line text-6xl"></i>
+            </div>
+            <p class="text-gray-500 text-lg">No data available. Please enter a valid symbol and click Update.</p>
         </div>
     </div>
 
@@ -287,6 +211,42 @@
                 hasData: false,
                 showError: false,
                 errorMessage: '',
+                
+                // Popular cryptocurrencies data
+                popularCryptos: [
+                    {
+                        symbol: 'BTC',
+                        name: 'Bitcoin',
+                        color: 'linear-gradient(135deg, #f7931a 0%, #ffa500 100%)'
+                    },
+                    {
+                        symbol: 'ETH',
+                        name: 'Ethereum',
+                        color: 'linear-gradient(135deg, #627eea 0%, #4169e1 100%)'
+                    },
+                    {
+                        symbol: 'BNB',
+                        name: 'Binance Coin',
+                        color: 'linear-gradient(135deg, #f3ba2f 0%, #ffd700 100%)'
+                    },
+                    {
+                        symbol: 'SOL',
+                        name: 'Solana',
+                        color: 'linear-gradient(135deg, #00d4aa 0%, #14b8a6 100%)'
+                    }
+                ],
+                
+                // Quick trading pairs
+                quickPairs: [
+                    'BTCUSDT',
+                    'ETHUSDT',
+                    'BNBUSDT',
+                    'SOLUSDT',
+                    'ADAUSDT',
+                    'DOTUSDT',
+                    'MATICUSDT',
+                    'AVAXUSDT'
+                ],
 
                 init() {
                     console.log('Initialized crypto analyzer');

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pinia@2/dist/pinia.umd.js"></script>
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <div id="app"></div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+        const { createPinia, defineStore } = Pinia;
+
+        // Auth Store
+        const useAuthStore = defineStore('auth', {
+            state: () => ({
+                user: { email: 'demo@example.com' }, // Demo user
+                authLoading: false,
+                authError: '',
+                authEmail: '',
+                authPassword: ''
+            }),
+            getters: {
+                isAuthenticated: (state) => !!state.user
+            },
+            actions: {
+                async handleAuth() {
+                    this.authLoading = true;
+                    this.authError = '';
+                    
+                    // Simulate login
+                    setTimeout(() => {
+                        this.user = { email: this.authEmail };
+                        this.authLoading = false;
+                        this.authEmail = '';
+                        this.authPassword = '';
+                        window.location.hash = '#/';
+                    }, 1000);
+                },
+                signOut() {
+                    this.user = null;
+                    window.location.hash = '#/login';
+                }
+            }
+        });
+
+        // Crypto Store
+        const useCryptoStore = defineStore('crypto', {
+            state: () => ({
+                symbol: 'BTCUSDT',
+                timeframes: [],
+                isLoading: false,
+                hasData: false,
+                showError: false,
+                errorMessage: '',
+                isAILoading: false,
+                showAIModal: false,
+                aiAnalysis: null,
+                aiError: '',
+                deepseekApiKey: '',
+                availableTimeframes: [
+                    { interval: '1m', label: '1 Minute', description: 'Very short term' },
+                    { interval: '5m', label: '5 Minutes', description: 'Short term' },
+                    { interval: '15m', label: '15 Minutes', description: 'Medium term' },
+                    { interval: '1h', label: '1 Hour', description: 'Long term' }
+                ],
+                selectedTimeframes: ['1m', '5m', '15m'],
+                popularCryptos: [
+                    { symbol: 'BTC', name: 'Bitcoin', color: 'linear-gradient(135deg, #f7931a 0%, #ffa500 100%)' },
+                    { symbol: 'ETH', name: 'Ethereum', color: 'linear-gradient(135deg, #627eea 0%, #4169e1 100%)' },
+                    { symbol: 'BNB', name: 'Binance Coin', color: 'linear-gradient(135deg, #f3ba2f 0%, #ffd700 100%)' },
+                    { symbol: 'SOL', name: 'Solana', color: 'linear-gradient(135deg, #00d4aa 0%, #14b8a6 100%)' }
+                ],
+                quickPairs: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT']
+            }),
+            actions: {
+                init() {
+                    this.updateTimeframes();
+                    this.updateData();
+                    setInterval(() => this.autoUpdate(), 30000);
+                },
+                updateTimeframes() {
+                    this.timeframes = this.selectedTimeframes.map(interval => ({
+                        name: interval,
+                        price: 0,
+                        signal: '',
+                        rsi: null,
+                        macd: null,
+                        ema20: null,
+                        volume: 0,
+                        status: 'live'
+                    }));
+                },
+                async updateData() {
+                    if (!this.symbol.trim()) return;
+                    
+                    this.isLoading = true;
+                    this.hasData = false;
+                    this.showError = false;
+                    
+                    try {
+                        // Simulate API call
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Generate mock data
+                        this.timeframes.forEach(tf => {
+                            tf.price = 45000 + Math.random() * 5000;
+                            tf.rsi = 30 + Math.random() * 40;
+                            tf.macd = (Math.random() - 0.5) * 2;
+                            tf.volume = Math.random() * 1000000;
+                            tf.signal = tf.rsi > 70 ? 'Bearish' : tf.rsi < 30 ? 'Bullish' : 'Reversal';
+                        });
+                        
+                        this.hasData = true;
+                    } catch (error) {
+                        this.errorMessage = 'Failed to fetch data';
+                        this.showError = true;
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                autoUpdate() {
+                    if (this.hasData && !this.isLoading) {
+                        this.updateData();
+                    }
+                },
+                selectAllTimeframes() {
+                    this.selectedTimeframes = this.availableTimeframes.map(tf => tf.interval);
+                    this.updateTimeframes();
+                },
+                getSignalIcon(signal) {
+                    switch(signal) {
+                        case 'Bullish': return 'fa-arrow-trend-up';
+                        case 'Bearish': return 'fa-arrow-trend-down';
+                        case 'Reversal': return 'fa-exchange-alt';
+                        default: return 'fa-chart-line';
+                    }
+                },
+                formatNumber(num) {
+                    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+                    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+                    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+                    return num.toString();
+                },
+                async askAIForDecision() {
+                    if (!this.hasData) {
+                        this.errorMessage = 'Please update data first';
+                        this.showError = true;
+                        return;
+                    }
+                    
+                    this.isAILoading = true;
+                    this.showAIModal = true;
+                    this.aiAnalysis = null;
+                    this.aiError = '';
+                    
+                    try {
+                        // Simulate AI analysis
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        
+                        this.aiAnalysis = {
+                            recommendation: 'BUY - Strong bullish momentum detected across multiple timeframes',
+                            confidence: 'High confidence based on technical indicators and market sentiment',
+                            analysis: 'The market shows strong upward momentum with RSI indicating healthy buying pressure. Multiple timeframes align for potential upside movement.',
+                            risks: 'Market volatility could impact short-term positions. Always use proper risk management.',
+                            strategy: 'Consider entering near current price levels with stop loss below support. Take profit targets at resistance levels.',
+                            timeframeAnalysis: this.timeframes.map(tf => ({
+                                timeframe: tf.name,
+                                signal: tf.signal,
+                                summary: `Current price: $${tf.price.toFixed(2)}. RSI: ${tf.rsi.toFixed(2)}. Signal: ${tf.signal}.`
+                            }))
+                        };
+                    } catch (error) {
+                        this.aiError = 'Failed to get AI analysis';
+                    } finally {
+                        this.isAILoading = false;
+                    }
+                },
+                getTradeDirection() {
+                    if (!this.aiAnalysis?.recommendation) return 'long';
+                    return this.aiAnalysis.recommendation.toLowerCase().includes('buy') ? 'long' : 'short';
+                },
+                getSignalColor() {
+                    return this.getTradeDirection() === 'short' ? 'red' : 'green';
+                },
+                getSignalIcon() {
+                    return this.getTradeDirection() === 'short' ? 'fas fa-arrow-down' : 'fas fa-arrow-up';
+                },
+                calculateRiskPercentage() {
+                    return '2.5'; // Mock value
+                },
+                calculateTargetPercentage() {
+                    return '5.0'; // Mock value
+                }
+            }
+        });
+
+        // Login Component
+        const Login = {
+            template: `
+                <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800">
+                    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
+                        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-t-xl">
+                            <div class="text-center">
+                                <h1 class="text-3xl font-bold mb-2">Crypto Analyzer</h1>
+                                <p class="text-blue-100">Please login to access the trading platform</p>
+                            </div>
+                        </div>
+                        <div class="p-8">
+                            <div v-if="authError" class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <span>{{ authError }}</span>
+                                </div>
+                            </div>
+                            <form @submit.prevent="handleAuth">
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        v-model="authEmail"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                                        placeholder="Enter your email"
+                                        required
+                                    >
+                                </div>
+                                <div class="mb-8">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                                        Password
+                                    </label>
+                                    <input
+                                        id="password"
+                                        type="password"
+                                        v-model="authPassword"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                                        placeholder="Enter your password"
+                                        required
+                                    >
+                                </div>
+                                <button
+                                    type="submit"
+                                    :disabled="authLoading"
+                                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-lg font-semibold"
+                                >
+                                    <span v-if="authLoading" class="flex items-center justify-center">
+                                        <i class="fas fa-spinner animate-spin mr-2"></i>
+                                        Signing In...
+                                    </span>
+                                    <span v-else>Sign In</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const authStore = useAuthStore();
+                return { ...authStore };
+            }
+        };
+
+        // Home Component
+        const Home = {
+            template: `
+                <div class="min-h-screen bg-gray-50">
+                    <header class="bg-white shadow-sm border-b">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="flex justify-between items-center h-16">
+                                <div class="flex items-center">
+                                    <h1 class="text-xl font-bold text-gray-900">Crypto Analyzer</h1>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <button
+                                        @click="askAIForDecision"
+                                        class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all"
+                                    >
+                                        <i class="fas fa-robot mr-2"></i>
+                                        AI Analysis
+                                    </button>
+                                    <button
+                                        @click="updateData"
+                                        :disabled="isLoading"
+                                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                    >
+                                        <i v-if="isLoading" class="fas fa-spinner animate-spin mr-2"></i>
+                                        <i v-else class="fas fa-sync mr-2"></i>
+                                        Update Data
+                                    </button>
+                                    <button
+                                        @click="signOut"
+                                        class="text-gray-600 hover:text-gray-900"
+                                    >
+                                        <i class="fas fa-sign-out-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div class="mb-8">
+                            <div class="flex items-center space-x-4">
+                                <input
+                                    v-model="symbol"
+                                    @keyup.enter="updateData"
+                                    type="text"
+                                    placeholder="Enter trading pair (e.g., BTCUSDT)"
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                <button
+                                    @click="updateData"
+                                    :disabled="isLoading"
+                                    class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    Analyze
+                                </button>
+                            </div>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button
+                                    v-for="pair in quickPairs"
+                                    :key="pair"
+                                    @click="symbol = pair; updateData()"
+                                    class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm hover:bg-gray-300 transition-all"
+                                >
+                                    {{ pair }}
+                                </button>
+                            </div>
+                            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div
+                                    v-for="crypto in popularCryptos"
+                                    :key="crypto.symbol"
+                                    class="p-4 rounded-lg cursor-pointer transition-all hover:scale-105"
+                                    :style="{ background: crypto.color }"
+                                    @click="symbol = crypto.symbol + 'USDT'; updateData()"
+                                >
+                                    <h3 class="text-white font-bold">{{ crypto.symbol }}</h3>
+                                    <p class="text-white/80 text-sm">{{ crypto.name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-lg font-semibold text-gray-900">Timeframes</h2>
+                                <button
+                                    @click="selectAllTimeframes"
+                                    class="text-sm text-blue-600 hover:text-blue-800"
+                                >
+                                    Select All
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <label
+                                    v-for="tf in availableTimeframes"
+                                    :key="tf.interval"
+                                    class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        v-model="selectedTimeframes"
+                                        :value="tf.interval"
+                                        @change="updateTimeframes"
+                                        class="mr-2"
+                                    >
+                                    <div>
+                                        <div class="font-medium">{{ tf.label }}</div>
+                                        <div class="text-xs text-gray-500">{{ tf.description }}</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div
+                            v-if="showError"
+                            class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg"
+                        >
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                <span>{{ errorMessage }}</span>
+                            </div>
+                        </div>
+                        <div v-if="hasData" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div
+                                v-for="tf in timeframes"
+                                :key="tf.name"
+                                class="bg-white p-6 rounded-lg shadow-sm border"
+                            >
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold">{{ tf.name }}</h3>
+                                    <span
+                                        class="px-2 py-1 rounded-full text-xs font-medium"
+                                        :class="{
+                                            'bg-green-100 text-green-800': tf.status === 'live',
+                                            'bg-yellow-100 text-yellow-800': tf.status === 'updating'
+                                        }"
+                                    >
+                                        {{ tf.status }}
+                                    </span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Price:</span>
+                                        <span class="font-medium">${{ tf.price.toFixed(2) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Signal:</span>
+                                        <span
+                                            class="font-medium"
+                                            :class="{
+                                                'text-green-600': tf.signal === 'Bullish',
+                                                'text-red-600': tf.signal === 'Bearish',
+                                                'text-yellow-600': tf.signal === 'Reversal'
+                                            }"
+                                        >
+                                            <i :class="['fas', getSignalIcon(tf.signal)]"></i>
+                                            {{ tf.signal }}
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">RSI:</span>
+                                        <span class="font-medium">{{ tf.rsi?.toFixed(2) || 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">MACD:</span>
+                                        <span class="font-medium">{{ tf.macd?.toFixed(4) || 'N/A' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Volume:</span>
+                                        <span class="font-medium">{{ formatNumber(tf.volume) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-if="isLoading"
+                            class="text-center py-12"
+                        >
+                            <i class="fas fa-spinner animate-spin text-4xl text-blue-600 mb-4"></i>
+                            <p class="text-gray-600">Fetching market data...</p>
+                        </div>
+                    </main>
+                    <div
+                        v-if="showAIModal"
+                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    >
+                        <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                            <div class="p-6">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h2 class="text-2xl font-bold">AI Trading Analysis</h2>
+                                    <button
+                                        @click="showAIModal = false"
+                                        class="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div v-if="isAILoading" class="text-center py-8">
+                                    <i class="fas fa-robot animate-pulse-slow text-4xl text-purple-600 mb-4"></i>
+                                    <p class="text-gray-600">Analyzing market data...</p>
+                                </div>
+                                <div v-else-if="aiError" class="text-center py-8">
+                                    <i class="fas fa-exclamation-triangle text-4xl text-red-600 mb-4"></i>
+                                    <p class="text-gray-600">{{ aiError }}</p>
+                                </div>
+                                <div v-else-if="aiAnalysis" class="space-y-6">
+                                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+                                        <h3 class="text-xl font-bold mb-2">Recommendation</h3>
+                                        <p class="text-lg font-medium">{{ aiAnalysis.recommendation }}</p>
+                                        <p class="text-gray-600 mt-2">{{ aiAnalysis.confidence }}</p>
+                                    </div>
+                                    <div class="bg-white border rounded-lg p-6">
+                                        <h3 class="text-xl font-bold mb-4">Market Analysis</h3>
+                                        <p class="text-gray-700">{{ aiAnalysis.analysis }}</p>
+                                    </div>
+                                    <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                                        <h3 class="text-xl font-bold mb-4 text-red-800">Risk Assessment</h3>
+                                        <p class="text-red-700">{{ aiAnalysis.risks }}</p>
+                                    </div>
+                                    <div class="bg-white border rounded-lg p-6">
+                                        <h3 class="text-xl font-bold mb-4">Timeframe Analysis</h3>
+                                        <div class="space-y-4">
+                                            <div
+                                                v-for="tf in aiAnalysis.timeframeAnalysis"
+                                                :key="tf.timeframe"
+                                                class="border-l-4 border-blue-500 pl-4"
+                                            >
+                                                <h4 class="font-semibold">{{ tf.timeframe }}</h4>
+                                                <p class="text-gray-600">{{ tf.summary }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const authStore = useAuthStore();
+                const cryptoStore = useCryptoStore();
+                
+                onMounted(() => {
+                    cryptoStore.init();
+                });
+                
+                return { ...authStore, ...cryptoStore };
+            }
+        };
+
+        // Simple Router
+        const routes = [
+            { path: '/', component: Home },
+            { path: '/login', component: Login }
+        ];
+
+        const Router = {
+            install: (app) => {
+                app.config.globalProperties.$route = ref(window.location.hash.slice(1) || '/');
+                app.config.globalProperties.$router = {
+                    push: (path) => {
+                        window.location.hash = path;
+                        app.config.globalProperties.$route.value = path;
+                    }
+                };
+                
+                window.addEventListener('hashchange', () => {
+                    app.config.globalProperties.$route.value = window.location.hash.slice(1) || '/';
+                });
+            }
+        };
+
+        // Main App
+        const App = {
+            template: `
+                <component :is="$route.value === '/login' ? 'Login' : 'Home'" />
+            `
+        };
+
+        // Initialize app
+        const pinia = createPinia();
+        const app = createApp(App);
+        
+        app.use(pinia);
+        app.use(Router);
+        
+        app.mount('#app');
+    </script>
+</body>
+</html>

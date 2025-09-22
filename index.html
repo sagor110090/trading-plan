@@ -345,12 +345,102 @@
                         </div>
 
                         <!-- Trading Strategy -->
-                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <i class="fas fa-chess-knight text-blue-600"></i>
-                                Suggested Strategy
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
+                            <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                                    <i class="fas fa-chess-knight text-white text-sm"></i>
+                                </div>
+                                Trading Signals
                             </h3>
-                            <div class="text-gray-700 whitespace-pre-wrap" x-text="aiAnalysis.strategy"></div>
+                            
+                            <!-- Trading Signal Cards -->
+                            <div class="space-y-4" id="trading-signals">
+                                <!-- Current Price Reference -->
+                                <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-chart-line text-gray-600 text-sm"></i>
+                                            <h4 class="font-semibold text-gray-800 text-sm">Current Price Reference</h4>
+                                        </div>
+                                        <span class="text-lg font-bold text-gray-900" id="current-price">$0.00</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Trading Signal Grid -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <!-- Entry Signal -->
+                                    <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fas fa-sign-in-alt text-blue-600 text-sm"></i>
+                                            <h4 class="font-semibold text-gray-800 text-sm">Entry Price</h4>
+                                        </div>
+                                        <p class="text-2xl font-bold text-blue-600" id="entry-price">$0.00</p>
+                                        <p class="text-xs text-gray-500 mt-1" id="entry-reason"></p>
+                                    </div>
+                                    
+                                    <!-- Stop Loss -->
+                                    <div class="bg-white rounded-lg p-4 border-l-4 border-red-500 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fas fa-shield-alt text-red-600 text-sm"></i>
+                                            <h4 class="font-semibold text-gray-800 text-sm">Stop Loss</h4>
+                                        </div>
+                                        <p class="text-2xl font-bold text-red-600" id="stop-loss-price">$0.00</p>
+                                        <p class="text-xs text-red-500 mt-1" id="stop-loss-risk"></p>
+                                    </div>
+                                    
+                                    <!-- Take Profit -->
+                                    <div class="bg-white rounded-lg p-4 border-l-4 border-green-500 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fas fa-coins text-green-600 text-sm"></i>
+                                            <h4 class="font-semibold text-gray-800 text-sm">Take Profit</h4>
+                                        </div>
+                                        <p class="text-lg font-bold text-green-600" id="take-profit-price">$0.00</p>
+                                        <p class="text-xs text-green-500 mt-1" id="take-profit-targets"></p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Risk Management -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <!-- Position Sizing -->
+                                    <div class="bg-white rounded-lg p-4 border-l-4 border-purple-500 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fas fa-chart-pie text-purple-600 text-sm"></i>
+                                            <h4 class="font-semibold text-gray-800 text-sm">Position Size</h4>
+                                        </div>
+                                        <p class="text-lg font-bold text-purple-600" id="position-size">0%</p>
+                                        <p class="text-xs text-gray-500 mt-1">of portfolio</p>
+                                    </div>
+                                    
+                                    <!-- Risk-Reward Ratio -->
+                                    <div class="bg-white rounded-lg p-4 border-l-4 border-yellow-500 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fas fa-balance-scale text-yellow-600 text-sm"></i>
+                                            <h4 class="font-semibold text-gray-800 text-sm">Risk/Reward</h4>
+                                        </div>
+                                        <p class="text-lg font-bold text-yellow-600" id="risk-reward">1:0</p>
+                                        <p class="text-xs text-gray-500 mt-1">ratio</p>
+                                    </div>
+                                    
+                                    <!-- Time Horizon -->
+                                    <div class="bg-white rounded-lg p-4 border-l-4 border-indigo-500 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fas fa-clock text-indigo-600 text-sm"></i>
+                                            <h4 class="font-semibold text-gray-800 text-sm">Time Horizon</h4>
+                                        </div>
+                                        <p class="text-lg font-bold text-indigo-600" id="time-horizon">N/A</p>
+                                        <p class="text-xs text-gray-500 mt-1">expected duration</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Strategy Details -->
+                                <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <i class="fas fa-lightbulb text-yellow-600 text-sm"></i>
+                                        <h4 class="font-semibold text-gray-800 text-sm">Strategy Details</h4>
+                                    </div>
+                                    <div class="text-sm text-gray-700 leading-relaxed" id="strategy-details"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Timeframe Breakdown -->
@@ -568,6 +658,11 @@
                         const aiResponse = await this.callDeepSeekAPI(analysisData);
                         this.aiAnalysis = this.parseAIResponse(aiResponse);
                         console.log('AI analysis completed');
+                        
+                        // Parse and populate trading signals layout
+                        this.$nextTick(() => {
+                            this.populateTradingSignals(this.aiAnalysis.strategy, this.timeframes[0]?.price || 0);
+                        });
                     } catch (error) {
                         console.error('AI Analysis Error:', error);
                         this.aiError = `Failed to get AI analysis: ${error.message}`;
@@ -694,7 +789,14 @@ Please provide a comprehensive analysis including:
 1. **OVERALL RECOMMENDATION:** Clear buy/sell/hold recommendation with confidence level
 2. **MARKET ANALYSIS:** Detailed analysis of current market conditions, trend strength, and momentum
 3. **RISK ASSESSMENT:** Key risks, potential downside, and risk management suggestions
-4. **SUGGESTED STRATEGY:** Specific entry/exit points, position sizing, and trading strategy
+4. **SUGGESTED STRATEGY:** Specific trading signals with exact price levels:
+   - **Current Price:** ${timeframes[0].price.toFixed(2)} (use as reference)
+   - **Entry Price:** Specific price level for entry (must be within 2% of current price)
+   - **Stop Loss:** Exact stop loss price with risk percentage
+   - **Take Profit Levels:** Multiple take profit targets with profit percentages
+   - **Position Sizing:** Recommended position size as percentage of portfolio
+   - **Risk-Reward Ratio:** Calculate and state the risk-reward ratio
+   - **Time Horizon:** Expected duration for the trade
 5. **TIMEFRAME BREAKDOWN:** Individual analysis for each timeframe with specific insights
 
 Format your response as a structured JSON object with these exact keys:
@@ -1036,6 +1138,76 @@ Provide practical, actionable insights that a trader can use immediately.`;
                     localStorage.removeItem('aiAnalysisData');
 
                     console.log('Modal state cleaned up on page unload');
+                },
+
+                // Parse strategy text and populate trading signals layout
+                populateTradingSignals(strategyText, currentPrice) {
+                    if (!strategyText || !currentPrice) return;
+
+                    try {
+                        // Parse strategy text to extract trading signals
+                        const entryMatch = strategyText.match(/Entry Price:\s*\$?([\d,]+\.?\d*)/);
+                        const stopLossMatch = strategyText.match(/Stop Loss:\s*\$?([\d,]+\.?\d*)/);
+                        const takeProfitMatch = strategyText.match(/Take Profit[^:]*:\s*\$?([\d,]+\.?\d*)/);
+                        const positionSizingMatch = strategyText.match(/Position Sizing:\s*(\d+)%?/);
+                        const riskRewardMatch = strategyText.match(/Risk-Reward Ratio:\s*(\d+):(\d+)/);
+                        const timeHorizonMatch = strategyText.match(/Time Horizon:\s*(.*?)\./);
+
+                        // Update DOM elements with trading signals
+                        const updateElement = (id, content, prefix = '', suffix = '') => {
+                            const element = document.getElementById(id);
+                            if (element && content) {
+                                element.textContent = prefix + content.trim() + suffix;
+                            }
+                        };
+
+                        // Current Price
+                        updateElement('current-price', currentPrice.toFixed(2), '$');
+
+                        // Entry Price
+                        const entryPrice = entryMatch ? parseFloat(entryMatch[1].replace(',', '')) : currentPrice;
+                        updateElement('entry-price', entryPrice.toFixed(2), '$');
+                        
+                        // Stop Loss
+                        const stopLossPrice = stopLossMatch ? parseFloat(stopLossMatch[1].replace(',', '')) : currentPrice * 0.98;
+                        updateElement('stop-loss-price', stopLossPrice.toFixed(2), '$');
+                        
+                        // Calculate and display risk percentage
+                        const riskPercentage = currentPrice > 0 ? ((currentPrice - stopLossPrice) / currentPrice * 100).toFixed(1) : 0;
+                        updateElement('stop-loss-risk', `${riskPercentage}% risk`);
+
+                        // Take Profit (extract first target or use primary)
+                        const takeProfitPrice = takeProfitMatch ? parseFloat(takeProfitMatch[1].replace(',', '')) : currentPrice * 1.02;
+                        updateElement('take-profit-price', takeProfitPrice.toFixed(2), '$');
+                        
+                        // Calculate and display profit percentage
+                        const profitPercentage = currentPrice > 0 ? ((takeProfitPrice - currentPrice) / currentPrice * 100).toFixed(1) : 0;
+                        updateElement('take-profit-targets', `${profitPercentage}% target`);
+
+                        // Position Sizing
+                        const positionSize = positionSizingMatch ? positionSizingMatch[1] : '10';
+                        updateElement('position-size', positionSize, '', '%');
+
+                        // Risk-Reward Ratio
+                        const riskReward = riskRewardMatch ? `${riskRewardMatch[1]}:${riskRewardMatch[2]}` : '1:2';
+                        updateElement('risk-reward', riskReward);
+
+                        // Time Horizon
+                        const timeHorizon = timeHorizonMatch ? timeHorizonMatch[1] : 'Short-term';
+                        updateElement('time-horizon', timeHorizon);
+
+                        // Strategy Details - extract and format the full strategy
+                        updateElement('strategy-details', strategyText);
+
+                        console.log('Trading signals populated successfully');
+                    } catch (error) {
+                        console.error('Error parsing trading signals:', error);
+                        // Fallback: show original strategy text
+                        const detailsElement = document.getElementById('strategy-details');
+                        if (detailsElement) {
+                            detailsElement.textContent = strategyText;
+                        }
+                    }
                 }
             }
         }

@@ -533,9 +533,14 @@
 
                 // Ask AI for trading decision
                 async askAIForDecision() {
+                    console.log('askAIForDecision called');
+                    console.log('hasData:', this.hasData);
+                    console.log('timeframes length:', this.timeframes.length);
+                    
                     if (!this.hasData || this.timeframes.length === 0) {
                         this.errorMessage = 'Please update data first before asking for AI analysis';
                         this.showError = true;
+                        console.log('No data available for AI analysis');
                         return;
                     }
 
@@ -550,6 +555,7 @@
                         this.deepseekApiKey = apiKey;
                     }
 
+                    console.log('Opening AI modal...');
                     this.isAILoading = true;
                     this.showAIModal = true;
                     this.aiAnalysis = null;
@@ -558,8 +564,10 @@
                     try {
                         // Prepare comprehensive data for AI analysis
                         const analysisData = this.prepareAnalysisData();
+                        console.log('Analysis data prepared:', analysisData);
                         const aiResponse = await this.callDeepSeekAPI(analysisData);
                         this.aiAnalysis = this.parseAIResponse(aiResponse);
+                        console.log('AI analysis completed');
                     } catch (error) {
                         console.error('AI Analysis Error:', error);
                         this.aiError = `Failed to get AI analysis: ${error.message}`;

@@ -653,6 +653,9 @@ Provide practical, actionable insights that a trader can use immediately.`;
                     if (!strategyText || !currentPrice) return;
 
                     try {
+                        // Get strategy data from aiAnalysis if available
+                        const strategy = this.aiAnalysis?.strategy || {};
+                        
                         // Extract signal direction from strategy or recommendation
                         const isSellSignal = strategyText.toLowerCase().includes('sell') || 
                                            strategyText.toLowerCase().includes('short') ||
@@ -661,13 +664,13 @@ Provide practical, actionable insights that a trader can use immediately.`;
                                           strategyText.toLowerCase().includes('long') ||
                                           strategyText.toLowerCase().includes('bullish');
 
-                        // Parse strategy text to extract trading signals
-                        const entryMatch = strategyText.match(/Entry Price:\s*\$?([\d,]+\.?\d*)/);
-                        const stopLossMatch = strategyText.match(/Stop Loss:\s*\$?([\d,]+\.?\d*)/);
-                        const takeProfitMatch = strategyText.match(/Take Profit[^:]*:\s*\$?([\d,]+\.?\d*)/);
-                        const positionSizingMatch = strategyText.match(/Position Sizing:\s*(\d+)%?/);
-                        const riskRewardMatch = strategyText.match(/Risk-Reward Ratio:\s*(\d+):(\d+)/);
-                        const timeHorizonMatch = strategyText.match(/Time Horizon:\s*(.*?)\./);
+                        // Use strategy data from aiAnalysis, fallback to parsing text
+                        const entryPrice = strategy.entryPrice || currentPrice;
+                        const stopLossPrice = strategy.stopLoss || currentPrice * 0.98;
+                        const takeProfitPrice = strategy.takeProfitLevels?.[0]?.price || currentPrice * 1.02;
+                        const positionSize = strategy.positionSizing || '10%';
+                        const riskReward = strategy.riskRewardRatio || '1:2';
+                        const timeHorizon = strategy.timeHorizon || 'Short-term';
 
                         // Update signal direction display
                         const signalIndicator = document.getElementById('signal-indicator');
@@ -704,35 +707,29 @@ Provide practical, actionable insights that a trader can use immediately.`;
                         updateElement('current-price', currentPrice.toFixed(2), '$');
 
                         // Entry Price
-                        let entryPrice = entryMatch ? parseFloat(entryMatch[1].replace(',', '')) : currentPrice;
                         updateElement('entry-price', entryPrice.toFixed(2), '$');
                         
                         // Stop Loss
-                        const stopLossPrice = stopLossMatch ? parseFloat(stopLossMatch[1].replace(',', '')) : currentPrice * 0.98;
                         updateElement('stop-loss-price', stopLossPrice.toFixed(2), '$');
                         
                         // Calculate and display risk percentage
-                        const riskPercentage = currentPrice > 0 ? ((currentPrice - stopLossPrice) / currentPrice * 100).toFixed(1) : 0;
+                        const riskPercentage = currentPrice > 0 ? Math.abs(((currentPrice - stopLossPrice) / currentPrice * 100)).toFixed(1) : 0;
                         updateElement('stop-loss-risk', `${riskPercentage}% risk`);
 
-                        // Take Profit (extract first target or use primary)
-                        const takeProfitPrice = takeProfitMatch ? parseFloat(takeProfitMatch[1].replace(',', '')) : currentPrice * 1.02;
+                        // Take Profit
                         updateElement('take-profit-price', takeProfitPrice.toFixed(2), '$');
                         
                         // Calculate and display profit percentage
-                        const profitPercentage = currentPrice > 0 ? ((takeProfitPrice - currentPrice) / currentPrice * 100).toFixed(1) : 0;
+                        const profitPercentage = currentPrice > 0 ? Math.abs(((takeProfitPrice - currentPrice) / currentPrice * 100)).toFixed(1) : 0;
                         updateElement('take-profit-targets', `${profitPercentage}% target`);
 
                         // Position Sizing
-                        const positionSize = positionSizingMatch ? positionSizingMatch[1] : '10';
-                        updateElement('position-size', positionSize, '', '%');
+                        updateElement('position-size', positionSize.replace('%', ''), '', '%');
 
                         // Risk-Reward Ratio
-                        const riskReward = riskRewardMatch ? `${riskRewardMatch[1]}:${riskRewardMatch[2]}` : '1:2';
                         updateElement('risk-reward', riskReward);
 
                         // Time Horizon
-                        const timeHorizon = timeHorizonMatch ? timeHorizonMatch[1] : 'Short-term';
                         updateElement('time-horizon', timeHorizon);
 
                         // Validate strategy consistency with signal direction

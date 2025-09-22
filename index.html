@@ -6,6 +6,7 @@
     <title>Crypto Multi-Timeframe Analyzer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -182,12 +183,12 @@
                     <i class="fas fa-brain" :class="{ 'animate-pulse': isAILoading }"></i>
                     <span x-text="isAILoading ? 'AI Analyzing...' : 'Ask AI for Decision'"></span>
                 </button>
-                <button
+                <!-- <button
                     @click="testBinanceDirect()"
                     class="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
                 >
                     Test API Connection
-                </button>
+                </button> -->
             </div>
         </div>
 
@@ -274,6 +275,67 @@
             <p class="text-gray-500 text-lg">No data available. Please enter a valid symbol and click Update.</p>
         </div>
 
+        <!-- Saved Analyses Section -->
+        <div class="mt-12 bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
+                        <i class="fas fa-database text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Saved Analyses</h3>
+                        <p class="text-sm text-gray-600">Your AI trading analysis history</p>
+                    </div>
+                </div>
+                <button @click="loadSavedAnalyses()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Refresh
+                </button>
+            </div>
+
+            <div x-show="savedAnalyses.length === 0" class="text-center py-8">
+                <div class="text-gray-400 mb-4">
+                    <i class="fas fa-chart-line text-6xl"></i>
+                </div>
+                <p class="text-gray-500">No saved analyses yet. Perform an AI analysis to save it here.</p>
+            </div>
+
+            <div x-show="savedAnalyses.length > 0" class="space-y-4">
+                <template x-for="analysis in savedAnalyses" :key="analysis.id">
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h4 class="font-semibold text-gray-800" x-text="analysis.symbol"></h4>
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                                          :class="{
+                                              'bg-green-100 text-green-800': analysis.recommendation.toLowerCase().includes('buy'),
+                                              'bg-red-100 text-red-800': analysis.recommendation.toLowerCase().includes('sell'),
+                                              'bg-yellow-100 text-yellow-800': analysis.recommendation.toLowerCase().includes('hold')
+                                          }"
+                                          x-text="analysis.recommendation.split(' ')[0]"></span>
+                                    <span class="text-xs text-gray-500" x-text="new Date(analysis.created_at).toLocaleDateString()"></span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2" x-text="analysis.confidence"></p>
+                                <div class="text-sm text-gray-700">
+                                    <p class="font-medium mb-1">Strategy:</p>
+                                    <p class="text-xs text-gray-600" x-text="analysis.strategy.substring(0, 150) + '...'"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 ml-4">
+                                <button @click="viewSavedAnalysis(analysis)" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Analysis">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button @click="deleteAnalysis(analysis.id)" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Analysis">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
         <!-- AI Analysis Modal -->
         <div x-show="showAIModal"
 
@@ -352,7 +414,7 @@
                                 </div>
                                 Trading Signals
                             </h3>
-                            
+
                             <!-- Trading Signal Cards -->
                             <div class="space-y-4" id="trading-signals">
                                 <!-- Current Price Reference -->
@@ -365,7 +427,7 @@
                                         <span class="text-lg font-bold text-gray-900" id="current-price">$0.00</span>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Trading Signal Grid -->
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <!-- Entry Signal -->
@@ -377,7 +439,7 @@
                                         <p class="text-2xl font-bold text-blue-600" id="entry-price">$0.00</p>
                                         <p class="text-xs text-gray-500 mt-1" id="entry-reason"></p>
                                     </div>
-                                    
+
                                     <!-- Stop Loss -->
                                     <div class="bg-white rounded-lg p-4 border-l-4 border-red-500 shadow-sm">
                                         <div class="flex items-center gap-2 mb-2">
@@ -387,7 +449,7 @@
                                         <p class="text-2xl font-bold text-red-600" id="stop-loss-price">$0.00</p>
                                         <p class="text-xs text-red-500 mt-1" id="stop-loss-risk"></p>
                                     </div>
-                                    
+
                                     <!-- Take Profit -->
                                     <div class="bg-white rounded-lg p-4 border-l-4 border-green-500 shadow-sm">
                                         <div class="flex items-center gap-2 mb-2">
@@ -398,7 +460,7 @@
                                         <p class="text-xs text-green-500 mt-1" id="take-profit-targets"></p>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Risk Management -->
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <!-- Position Sizing -->
@@ -410,7 +472,7 @@
                                         <p class="text-lg font-bold text-purple-600" id="position-size">0%</p>
                                         <p class="text-xs text-gray-500 mt-1">of portfolio</p>
                                     </div>
-                                    
+
                                     <!-- Risk-Reward Ratio -->
                                     <div class="bg-white rounded-lg p-4 border-l-4 border-yellow-500 shadow-sm">
                                         <div class="flex items-center gap-2 mb-2">
@@ -420,7 +482,7 @@
                                         <p class="text-lg font-bold text-yellow-600" id="risk-reward">1:0</p>
                                         <p class="text-xs text-gray-500 mt-1">ratio</p>
                                     </div>
-                                    
+
                                     <!-- Time Horizon -->
                                     <div class="bg-white rounded-lg p-4 border-l-4 border-indigo-500 shadow-sm">
                                         <div class="flex items-center gap-2 mb-2">
@@ -431,7 +493,7 @@
                                         <p class="text-xs text-gray-500 mt-1">expected duration</p>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Strategy Details -->
                                 <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
                                     <div class="flex items-center gap-2 mb-3">
@@ -495,6 +557,11 @@
     </div>
 
     <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://xcuubslgdlitnnkgbnza.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdXVic2xnZGxpdG5ua2dibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1MjgyMTEsImV4cCI6MjA3NDEwNDIxMX0.bEh9_6uT8Mj0RZWcBeG17wC59DvLC8RKAmm7MzuAbvg';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
         function cryptoAnalyzer() {
             return {
                 symbol: 'BTCUSDT',
@@ -510,6 +577,10 @@
                 aiAnalysis: null,
                 aiError: '',
                 deepseekApiKey: 'sk-6aa75f6257a943d3abc142c9a8b83af5', // Users should add their own API key
+
+                // Supabase properties
+                savedAnalyses: [],
+                isSavingAnalysis: false,
 
                 // Available timeframe options
                 availableTimeframes: [
@@ -572,6 +643,9 @@
                     // Reset modal state to ensure it's closed on page load
                     this.resetModalState();
 
+                    // Load saved analyses from Supabase
+                    this.loadSavedAnalyses();
+
                     // Initialize timeframes from selected intervals
                     this.updateTimeframes();
 
@@ -626,7 +700,7 @@
                     console.log('askAIForDecision called');
                     console.log('hasData:', this.hasData);
                     console.log('timeframes length:', this.timeframes.length);
-                    
+
                     if (!this.hasData || this.timeframes.length === 0) {
                         this.errorMessage = 'Please update data first before asking for AI analysis';
                         this.showError = true;
@@ -658,11 +732,14 @@
                         const aiResponse = await this.callDeepSeekAPI(analysisData);
                         this.aiAnalysis = this.parseAIResponse(aiResponse);
                         console.log('AI analysis completed');
-                        
+
                         // Parse and populate trading signals layout
                         this.$nextTick(() => {
                             this.populateTradingSignals(this.aiAnalysis.strategy, this.timeframes[0]?.price || 0);
                         });
+
+                        // Save analysis to Supabase
+                        this.saveAnalysisToSupabase();
                     } catch (error) {
                         console.error('AI Analysis Error:', error);
                         this.aiError = `Failed to get AI analysis: ${error.message}`;
@@ -1167,11 +1244,11 @@ Provide practical, actionable insights that a trader can use immediately.`;
                         // Entry Price
                         const entryPrice = entryMatch ? parseFloat(entryMatch[1].replace(',', '')) : currentPrice;
                         updateElement('entry-price', entryPrice.toFixed(2), '$');
-                        
+
                         // Stop Loss
                         const stopLossPrice = stopLossMatch ? parseFloat(stopLossMatch[1].replace(',', '')) : currentPrice * 0.98;
                         updateElement('stop-loss-price', stopLossPrice.toFixed(2), '$');
-                        
+
                         // Calculate and display risk percentage
                         const riskPercentage = currentPrice > 0 ? ((currentPrice - stopLossPrice) / currentPrice * 100).toFixed(1) : 0;
                         updateElement('stop-loss-risk', `${riskPercentage}% risk`);
@@ -1179,7 +1256,7 @@ Provide practical, actionable insights that a trader can use immediately.`;
                         // Take Profit (extract first target or use primary)
                         const takeProfitPrice = takeProfitMatch ? parseFloat(takeProfitMatch[1].replace(',', '')) : currentPrice * 1.02;
                         updateElement('take-profit-price', takeProfitPrice.toFixed(2), '$');
-                        
+
                         // Calculate and display profit percentage
                         const profitPercentage = currentPrice > 0 ? ((takeProfitPrice - currentPrice) / currentPrice * 100).toFixed(1) : 0;
                         updateElement('take-profit-targets', `${profitPercentage}% target`);
@@ -1207,6 +1284,108 @@ Provide practical, actionable insights that a trader can use immediately.`;
                         if (detailsElement) {
                             detailsElement.textContent = strategyText;
                         }
+                    }
+                },
+
+                // Save AI analysis to Supabase
+                async saveAnalysisToSupabase() {
+                    if (!this.aiAnalysis || !this.hasData) return;
+
+                    try {
+                        this.isSavingAnalysis = true;
+                        
+                        const analysisData = {
+                            symbol: this.symbol,
+                            recommendation: this.aiAnalysis.recommendation,
+                            confidence: this.aiAnalysis.confidence,
+                            analysis: this.aiAnalysis.analysis,
+                            risks: this.aiAnalysis.risks,
+                            strategy: this.aiAnalysis.strategy,
+                            timeframe_analysis: this.aiAnalysis.timeframeAnalysis,
+                            timeframes: this.timeframes,
+                            created_at: new Date().toISOString(),
+                            current_price: this.timeframes[0]?.price || 0
+                        };
+
+                        const { data, error } = await supabase
+                            .from('ai_analyses')
+                            .insert([analysisData])
+                            .select();
+
+                        if (error) {
+                            console.error('Error saving analysis to Supabase:', error);
+                            // Don't show error to user, just log it
+                        } else {
+                            console.log('Analysis saved to Supabase successfully:', data);
+                            // Add to saved analyses list
+                            this.savedAnalyses.unshift(data[0]);
+                        }
+                    } catch (error) {
+                        console.error('Error in saveAnalysisToSupabase:', error);
+                    } finally {
+                        this.isSavingAnalysis = false;
+                    }
+                },
+
+                // Load saved analyses from Supabase
+                async loadSavedAnalyses() {
+                    try {
+                        const { data, error } = await supabase
+                            .from('ai_analyses')
+                            .select('*')
+                            .order('created_at', { ascending: false })
+                            .limit(10);
+
+                        if (error) {
+                            console.error('Error loading saved analyses:', error);
+                        } else {
+                            this.savedAnalyses = data || [];
+                            console.log('Loaded saved analyses:', this.savedAnalyses.length);
+                        }
+                    } catch (error) {
+                        console.error('Error in loadSavedAnalyses:', error);
+                    }
+                },
+
+                // Delete saved analysis
+                async deleteAnalysis(id) {
+                    try {
+                        const { error } = await supabase
+                            .from('ai_analyses')
+                            .delete()
+                            .eq('id', id);
+
+                        if (error) {
+                            console.error('Error deleting analysis:', error);
+                        } else {
+                            this.savedAnalyses = this.savedAnalyses.filter(analysis => analysis.id !== id);
+                            console.log('Analysis deleted successfully');
+                        }
+                    } catch (error) {
+                        console.error('Error in deleteAnalysis:', error);
+                    }
+                },
+
+                // View saved analysis
+                viewSavedAnalysis(analysis) {
+                    // Load the analysis data into the modal
+                    this.aiAnalysis = {
+                        recommendation: analysis.recommendation,
+                        confidence: analysis.confidence,
+                        analysis: analysis.analysis,
+                        risks: analysis.risks,
+                        strategy: analysis.strategy,
+                        timeframeAnalysis: analysis.timeframe_analysis || []
+                    };
+                    
+                    // Show the modal
+                    this.showAIModal = true;
+                    
+                    // Populate trading signals if strategy exists
+                    if (analysis.strategy) {
+                        this.$nextTick(() => {
+                            this.populateTradingSignals(analysis.strategy, analysis.current_price || 0);
+                        });
                     }
                 }
             }

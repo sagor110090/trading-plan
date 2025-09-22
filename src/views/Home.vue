@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
+    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center">
-            <h1 class="text-xl font-bold text-gray-900">Crypto Analyzer</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Crypto Analyzer</h1>
           </div>
           <div class="flex items-center space-x-4">
             <button
@@ -39,8 +39,15 @@
               Update Data
             </button>
             <button
+              @click="themeStore.toggleTheme"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+              :title="themeStore.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+            >
+              <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
+            </button>
+            <button
               @click="signOut"
-              class="text-gray-600 hover:text-gray-900"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 ml-2"
             >
               <i class="fas fa-sign-out-alt"></i>
             </button>
@@ -59,7 +66,7 @@
             @keyup.enter="updateData"
             type="text"
             placeholder="Enter trading pair (e.g., BTCUSDT)"
-            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300"
           >
           <button
             @click="updateData"
@@ -76,7 +83,7 @@
             v-for="pair in quickPairs"
             :key="pair"
             @click="symbol = pair; updateData()"
-            class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm hover:bg-gray-300 transition-all"
+            class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
           >
             {{ pair }}
           </button>
@@ -100,7 +107,7 @@
       <!-- Timeframe Selection -->
       <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Timeframes</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Timeframes</h2>
           <button
             @click="selectAllTimeframes"
             class="text-sm text-blue-600 hover:text-blue-800"
@@ -112,7 +119,7 @@
           <label
             v-for="tf in availableTimeframes"
             :key="tf.interval"
-            class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+            class="flex items-center p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300"
           >
             <input
               type="checkbox"
@@ -122,8 +129,8 @@
               class="mr-2"
             >
             <div>
-              <div class="font-medium">{{ tf.label }}</div>
-              <div class="text-xs text-gray-500">{{ tf.description }}</div>
+              <div class="font-medium text-gray-900 dark:text-white">{{ tf.label }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ tf.description }}</div>
             </div>
           </label>
         </div>
@@ -132,7 +139,7 @@
       <!-- Error Message -->
       <div
         v-if="showError"
-        class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg"
+        class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300 rounded-lg transition-colors duration-300"
       >
         <div class="flex items-center">
           <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -145,10 +152,10 @@
         <div
           v-for="tf in timeframes"
           :key="tf.name"
-          class="bg-white p-6 rounded-lg shadow-sm border"
+          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300"
         >
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">{{ tf.name }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ tf.name }}</h3>
             <span
               class="px-2 py-1 rounded-full text-xs font-medium"
               :class="{
@@ -162,11 +169,11 @@
 
           <div class="space-y-3">
             <div class="flex justify-between">
-              <span class="text-gray-600">Price:</span>
-              <span class="font-medium">${{ tf.price.toFixed(2) }}</span>
+              <span class="text-gray-600 dark:text-gray-400">Price:</span>
+              <span class="font-medium text-gray-900 dark:text-white">${{ tf.price.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-gray-600">Signal:</span>
+              <span class="text-gray-600 dark:text-gray-400">Signal:</span>
               <span
                 class="font-medium"
                 :class="{
@@ -183,16 +190,16 @@
               </span>
             </div>
             <div class="flex justify-between">
-              <span class="text-gray-600">RSI:</span>
-              <span class="font-medium">{{ tf.rsi?.toFixed(2) || 'N/A' }}</span>
+              <span class="text-gray-600 dark:text-gray-400">RSI:</span>
+              <span class="font-medium text-gray-900 dark:text-white">{{ tf.rsi?.toFixed(2) || 'N/A' }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-gray-600">MACD:</span>
-              <span class="font-medium">{{ tf.macd?.toFixed(4) || 'N/A' }}</span>
+              <span class="text-gray-600 dark:text-gray-400">MACD:</span>
+              <span class="font-medium text-gray-900 dark:text-white">{{ tf.macd?.toFixed(4) || 'N/A' }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-gray-600">Volume:</span>
-              <span class="font-medium">{{ formatNumber(tf.volume) }}</span>
+              <span class="text-gray-600 dark:text-gray-400">Volume:</span>
+              <span class="font-medium text-gray-900 dark:text-white">{{ formatNumber(tf.volume) }}</span>
             </div>
           </div>
         </div>
@@ -204,7 +211,7 @@
         class="text-center py-12"
       >
         <i class="fas fa-spinner animate-spin text-4xl text-blue-600 mb-4"></i>
-        <p class="text-gray-600">Fetching market data...</p>
+        <p class="text-gray-600 dark:text-gray-400">Fetching market data...</p>
       </div>
     </main>
 
@@ -213,13 +220,13 @@
       v-if="showAIModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto transition-colors duration-300">
         <div class="p-6">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">AI Trading Analysis</h2>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">AI Trading Analysis</h2>
             <button
               @click="showAIModal = false"
-              class="text-gray-500 hover:text-gray-700"
+              class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
             >
               <i class="fas fa-times"></i>
             </button>
@@ -227,28 +234,28 @@
 
           <div v-if="isAILoading" class="text-center py-8">
             <i class="fas fa-robot animate-pulse-slow text-4xl text-purple-600 mb-4"></i>
-            <p class="text-gray-600">Analyzing market data...</p>
+            <p class="text-gray-600 dark:text-gray-400">Analyzing market data...</p>
           </div>
 
           <div v-else-if="aiError" class="text-center py-8">
             <i class="fas fa-exclamation-triangle text-4xl text-red-600 mb-4"></i>
-            <p class="text-gray-600">{{ aiError }}</p>
+            <p class="text-gray-600 dark:text-gray-400">{{ aiError }}</p>
           </div>
 
           <div v-else-if="aiAnalysis" class="space-y-6">
             <!-- Recommendation -->
-            <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
-              <h3 class="text-xl font-bold mb-2">Recommendation</h3>
-              <p class="text-lg font-medium">{{ aiAnalysis.recommendation }}</p>
-              <p class="text-gray-600 mt-2">{{ aiAnalysis.confidence }}</p>
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-lg transition-colors duration-300">
+              <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Recommendation</h3>
+              <p class="text-lg font-medium text-gray-900 dark:text-white">{{ aiAnalysis.recommendation }}</p>
+              <p class="text-gray-600 dark:text-gray-400 mt-2">{{ aiAnalysis.confidence }}</p>
             </div>
 
             <!-- Strategy -->
-            <div v-if="aiAnalysis.strategy" class="bg-white border rounded-lg p-6">
-              <h3 class="text-xl font-bold mb-4">Trading Strategy</h3>
+            <div v-if="aiAnalysis.strategy" class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
+              <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Trading Strategy</h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h4 class="font-semibold mb-2">Signal</h4>
+                  <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Signal</h4>
                   <div class="flex items-center space-x-2">
                     <div
                       class="w-8 h-8 rounded-full flex items-center justify-center"
@@ -257,50 +264,50 @@
                       <i :class="['fas', getSignalIcon(), 'text-white text-sm']"></i>
                     </div>
                     <span
-                      :class="['font-bold', getSignalColor() === 'green' ? 'text-green-600' : 'text-red-600']"
+                      :class="['font-bold', getSignalColor() === 'green' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400']"
                     >
                       {{ getSignalColor() === 'green' ? 'BUY SIGNAL' : 'SELL SIGNAL' }}
                     </span>
                   </div>
                 </div>
                 <div>
-                  <h4 class="font-semibold mb-2">Current Price</h4>
-                  <p class="font-medium">${{ timeframes[0]?.price?.toFixed(2) || '0.00' }}</p>
+                  <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Current Price</h4>
+                  <p class="font-medium text-gray-900 dark:text-white">${{ timeframes[0]?.price?.toFixed(2) || '0.00' }}</p>
                 </div>
                 <div>
-                  <h4 class="font-semibold mb-2">Risk</h4>
-                  <p class="font-medium">{{ calculateRiskPercentage() }}%</p>
+                  <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Risk</h4>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ calculateRiskPercentage() }}%</p>
                 </div>
                 <div>
-                  <h4 class="font-semibold mb-2">Target</h4>
-                  <p class="font-medium">{{ calculateTargetPercentage() }}%</p>
+                  <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Target</h4>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ calculateTargetPercentage() }}%</p>
                 </div>
               </div>
             </div>
 
             <!-- Analysis -->
-            <div class="bg-white border rounded-lg p-6">
-              <h3 class="text-xl font-bold mb-4">Market Analysis</h3>
-              <p class="text-gray-700 whitespace-pre-line">{{ aiAnalysis.analysis }}</p>
+            <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
+              <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Market Analysis</h3>
+              <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ aiAnalysis.analysis }}</p>
             </div>
 
             <!-- Risks -->
-            <div class="bg-red-50 border border-red-200 rounded-lg p-6">
-              <h3 class="text-xl font-bold mb-4 text-red-800">Risk Assessment</h3>
-              <p class="text-red-700 whitespace-pre-line">{{ aiAnalysis.risks }}</p>
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 transition-colors duration-300">
+              <h3 class="text-xl font-bold mb-4 text-red-800 dark:text-red-400">Risk Assessment</h3>
+              <p class="text-red-700 dark:text-red-300 whitespace-pre-line">{{ aiAnalysis.risks }}</p>
             </div>
 
             <!-- Timeframe Analysis -->
-            <div class="bg-white border rounded-lg p-6">
-              <h3 class="text-xl font-bold mb-4">Timeframe Analysis</h3>
+            <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
+              <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Timeframe Analysis</h3>
               <div class="space-y-4">
                 <div
                   v-for="tf in aiAnalysis.timeframeAnalysis"
                   :key="tf.timeframe"
-                  class="border-l-4 border-blue-500 pl-4"
+                  class="border-l-4 border-blue-500 dark:border-blue-400 pl-4"
                 >
-                  <h4 class="font-semibold">{{ tf.timeframe }}</h4>
-                  <p class="text-gray-600">{{ tf.summary }}</p>
+                  <h4 class="font-semibold text-gray-900 dark:text-white">{{ tf.timeframe }}</h4>
+                  <p class="text-gray-600 dark:text-gray-400">{{ tf.summary }}</p>
                 </div>
               </div>
             </div>
@@ -314,7 +321,7 @@
       v-if="showApiModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white rounded-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto transition-colors duration-300">
         <ApiKeyManager @close="showApiModal = false" />
       </div>
     </div>
@@ -325,6 +332,7 @@
 import { useAuthStore } from '@/stores/auth'
 import { useCryptoStore } from '@/stores/crypto'
 import { useApiKeyStore } from '@/stores/apiKey'
+import { useThemeStore } from '@/stores/theme'
 import ApiKeyManager from '@/components/ApiKeyManager.vue'
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -337,6 +345,7 @@ export default {
   setup() {
     const authStore = useAuthStore()
     const cryptoStore = useCryptoStore()
+    const themeStore = useThemeStore()
     const router = useRouter()
 
     // Auth store reactive properties
@@ -388,6 +397,9 @@ export default {
       isAuthenticated,
       signOut: authStore.signOut,
 
+      // Theme store
+      themeStore,
+
       // Crypto properties and methods
       symbol,
       timeframes,
@@ -412,6 +424,7 @@ export default {
       formatNumber: cryptoStore.formatNumber,
       getTradeDirection: cryptoStore.getTradeDirection,
       getSignalColor: cryptoStore.getSignalColor,
+      getSignalIcon: cryptoStore.getSignalIcon,
       calculateRiskPercentage: cryptoStore.calculateRiskPercentage,
       calculateTargetPercentage: cryptoStore.calculateTargetPercentage,
 

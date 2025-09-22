@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
     <!-- Header -->
-    <header class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
+    <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-4">
             <button
               @click="$router.back()"
-              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
+              class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
             >
               <i class="fas fa-arrow-left"></i>
             </button>
@@ -15,13 +15,20 @@
               <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 AI Analysis History
               </h1>
-              <p class="text-sm text-gray-500">Your trading analysis records</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Your trading analysis records</p>
             </div>
           </div>
           <div class="flex items-center space-x-3">
-            <div class="text-sm text-gray-500">
+            <div class="text-sm text-gray-500 dark:text-gray-400">
               {{ analyses.length }} {{ analyses.length === 1 ? 'analysis' : 'analyses' }}
             </div>
+            <button
+              @click="themeStore.toggleTheme"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+              :title="themeStore.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+            >
+              <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
+            </button>
             <button
               @click="loadAnalyses"
               :disabled="loading"
@@ -39,47 +46,47 @@
     <!-- Stats Cards -->
     <div v-if="analyses.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Total Analyses</p>
-              <p class="text-2xl font-bold text-gray-900">{{ analyses.length }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Total Analyses</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ analyses.length }}</p>
             </div>
-            <div class="p-3 bg-blue-100 rounded-lg">
-              <i class="fas fa-brain text-blue-600"></i>
+            <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <i class="fas fa-brain text-blue-600 dark:text-blue-400"></i>
             </div>
           </div>
         </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Symbols Tracked</p>
-              <p class="text-2xl font-bold text-gray-900">{{ uniqueSymbols }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Symbols Tracked</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ uniqueSymbols }}</p>
             </div>
-            <div class="p-3 bg-green-100 rounded-lg">
-              <i class="fas fa-chart-line text-green-600"></i>
+            <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <i class="fas fa-chart-line text-green-600 dark:text-green-400"></i>
             </div>
           </div>
         </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Latest Analysis</p>
-              <p class="text-lg font-bold text-gray-900">{{ latestAnalysisDate }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Latest Analysis</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white">{{ latestAnalysisDate }}</p>
             </div>
-            <div class="p-3 bg-purple-100 rounded-lg">
-              <i class="fas fa-clock text-purple-600"></i>
+            <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+              <i class="fas fa-clock text-purple-600 dark:text-purple-400"></i>
             </div>
           </div>
         </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Avg Confidence</p>
-              <p class="text-2xl font-bold text-gray-900">{{ avgConfidence }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Avg Confidence</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ avgConfidence }}</p>
             </div>
-            <div class="p-3 bg-orange-100 rounded-lg">
-              <i class="fas fa-percentage text-orange-600"></i>
+            <div class="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+              <i class="fas fa-percentage text-orange-600 dark:text-orange-400"></i>
             </div>
           </div>
         </div>
@@ -106,29 +113,29 @@
 
       <!-- Loading State -->
       <div v-if="loading && analyses.length === 0" class="text-center py-20">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-          <i class="fas fa-spinner animate-spin text-2xl text-blue-600"></i>
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-4">
+          <i class="fas fa-spinner animate-spin text-2xl text-blue-600 dark:text-blue-400"></i>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Loading AI Analyses</h3>
-        <p class="text-gray-500">Fetching your trading analysis history...</p>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Loading AI Analyses</h3>
+        <p class="text-gray-500 dark:text-gray-400">Fetching your trading analysis history...</p>
       </div>
 
       <!-- Auth Initializing State -->
       <div v-if="!authInitialized && !loading && !error" class="text-center py-20">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-          <i class="fas fa-shield-alt text-2xl text-purple-600"></i>
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full mb-4">
+          <i class="fas fa-shield-alt text-2xl text-purple-600 dark:text-purple-400"></i>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Initializing Authentication</h3>
-        <p class="text-gray-500">Setting up secure connection...</p>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Initializing Authentication</h3>
+        <p class="text-gray-500 dark:text-gray-400">Setting up secure connection...</p>
       </div>
 
       <!-- Empty State -->
       <div v-if="!loading && analyses.length === 0" class="text-center py-20">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-          <i class="fas fa-brain text-2xl text-gray-400"></i>
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+          <i class="fas fa-brain text-2xl text-gray-400 dark:text-gray-500"></i>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">No AI Analyses Yet</h3>
-        <p class="text-gray-500 mb-6">Start by performing your first AI analysis on the home page.</p>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No AI Analyses Yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">Start by performing your first AI analysis on the home page.</p>
         <button
           @click="$router.push('/')"
           class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
@@ -143,24 +150,24 @@
         <div
           v-for="analysis in analyses"
           :key="analysis.id"
-          class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 overflow-hidden"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-300 overflow-hidden"
         >
           <!-- Card Header -->
-          <div class="bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-4 border-b border-gray-100">
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-3">
-                <div class="p-2 bg-white rounded-lg shadow-sm">
+                <div class="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
                   <span class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                     {{ analysis.symbol }}
                   </span>
                 </div>
                 <div>
-                  <h3 class="font-semibold text-gray-900">{{ getShortRecommendation(analysis.recommendation) }}</h3>
-                  <p class="text-xs text-gray-500">{{ formatDate(analysis.created_at) }}</p>
+                  <h3 class="font-semibold text-gray-900 dark:text-white">{{ getShortRecommendation(analysis.recommendation) }}</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(analysis.created_at) }}</p>
                 </div>
               </div>
               <div class="flex items-center space-x-2">
-                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
                   {{ getConfidenceLevel(analysis.confidence) }}
                 </span>
               </div>
@@ -170,47 +177,47 @@
           <!-- Card Content -->
           <div class="p-6">
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <div class="text-center p-3 bg-gray-50 rounded-lg">
-                <p class="text-xs text-gray-500 mb-1">Current Price</p>
-                <p class="text-lg font-bold text-gray-900">${{ analysis.current_price?.toFixed(2) || 'N/A' }}</p>
+              <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Current Price</p>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">${{ analysis.current_price?.toFixed(2) || 'N/A' }}</p>
               </div>
-              <div class="text-center p-3 bg-gray-50 rounded-lg">
-                <p class="text-xs text-gray-500 mb-1">Strategy</p>
-                <p class="text-sm font-medium text-gray-700">{{ getStrategyType(analysis.strategy) }}</p>
+              <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Strategy</p>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ getStrategyType(analysis.strategy) }}</p>
               </div>
             </div>
             
             <div class="space-y-3">
               <div>
-                <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Market Analysis</h4>
-                <p class="text-sm text-gray-700 leading-relaxed line-clamp-2">{{ analysis.analysis }}</p>
+                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Market Analysis</h4>
+                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">{{ analysis.analysis }}</p>
               </div>
               
               <div>
-                <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Risk Assessment</h4>
-                <p class="text-sm text-red-600 leading-relaxed line-clamp-2">{{ analysis.risks }}</p>
+                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Risk Assessment</h4>
+                <p class="text-sm text-red-600 dark:text-red-400 leading-relaxed line-clamp-2">{{ analysis.risks }}</p>
               </div>
             </div>
           </div>
           
           <!-- Card Footer -->
-          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-2">
-                <i class="fas fa-chart-line text-gray-400 text-xs"></i>
-                <span class="text-xs text-gray-500">{{ analysis.timeframes?.length || 0 }} timeframes analyzed</span>
+                <i class="fas fa-chart-line text-gray-400 dark:text-gray-500 text-xs"></i>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ analysis.timeframes?.length || 0 }} timeframes analyzed</span>
               </div>
               <div class="flex items-center space-x-2">
                 <button
                   @click="viewAnalysis(analysis)"
-                  class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                   title="View Full Analysis"
                 >
                   <i class="fas fa-eye text-sm"></i>
                 </button>
                 <button
                   @click="confirmDelete(analysis)"
-                  class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                   title="Delete Analysis"
                 >
                   <i class="fas fa-trash text-sm"></i>
@@ -226,24 +233,24 @@
         v-if="showDeleteModal"
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       >
-        <div class="bg-white rounded-lg max-w-md w-full mx-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4 transition-colors duration-300">
           <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-bold text-gray-900">Delete AI Analysis</h3>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">Delete AI Analysis</h3>
               <button
                 @click="showDeleteModal = false"
-                class="text-gray-500 hover:text-gray-700"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
               >
                 <i class="fas fa-times"></i>
               </button>
             </div>
-            <p class="text-gray-600 mb-6">
+            <p class="text-gray-600 dark:text-gray-300 mb-6">
               Are you sure you want to delete this AI analysis for {{ analysisToDelete?.symbol }}? This action cannot be undone.
             </p>
             <div class="flex justify-end space-x-3">
               <button
                 @click="showDeleteModal = false"
-                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
               >
                 Cancel
               </button>
@@ -264,16 +271,16 @@
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         @click="showDetailModal = false"
       >
-        <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto transition-colors duration-300" @click.stop>
           <div class="p-6">
             <div class="flex justify-between items-center mb-6">
               <div>
-                <h2 class="text-2xl font-bold text-gray-900">AI Analysis Details</h2>
-                <p class="text-gray-600">{{ selectedAnalysis?.symbol }} - {{ formatDate(selectedAnalysis?.created_at) }}</p>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">AI Analysis Details</h2>
+                <p class="text-gray-600 dark:text-gray-400">{{ selectedAnalysis?.symbol }} - {{ formatDate(selectedAnalysis?.created_at) }}</p>
               </div>
               <button
                 @click="showDetailModal = false"
-                class="text-gray-500 hover:text-gray-700 text-2xl"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white text-2xl"
               >
                 <i class="fas fa-times"></i>
               </button>
@@ -281,93 +288,93 @@
 
             <div v-if="selectedAnalysis" class="space-y-6">
               <!-- Recommendation Header -->
-              <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+              <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-lg transition-colors duration-300">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-xl font-bold">Recommendation</h3>
-                  <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white">Recommendation</h3>
+                  <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium rounded-full">
                     {{ getConfidenceLevel(selectedAnalysis.confidence) }}
                   </span>
                 </div>
-                <p class="text-lg font-medium text-gray-900 mb-2">{{ selectedAnalysis.recommendation }}</p>
-                <div class="flex items-center space-x-4 text-sm text-gray-600">
+                <p class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ selectedAnalysis.recommendation }}</p>
+                <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                   <span><i class="fas fa-chart-line mr-1"></i> {{ selectedAnalysis.symbol }}</span>
                   <span><i class="fas fa-dollar-sign mr-1"></i> ${{ selectedAnalysis.current_price?.toFixed(2) || 'N/A' }}</span>
                 </div>
               </div>
 
               <!-- Strategy Section -->
-              <div v-if="selectedAnalysis.strategy" class="bg-white border rounded-lg p-6">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
-                  <i class="fas fa-chess-knight mr-2 text-blue-600"></i>
+              <div v-if="selectedAnalysis.strategy" class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
+                  <i class="fas fa-chess-knight mr-2 text-blue-600 dark:text-blue-400"></i>
                   Trading Strategy
                 </h3>
                 <div class="prose prose-sm max-w-none">
-                  <p class="text-gray-700 whitespace-pre-line">{{ selectedAnalysis.strategy }}</p>
+                  <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ selectedAnalysis.strategy }}</p>
                 </div>
               </div>
 
               <!-- Market Analysis -->
-              <div class="bg-white border rounded-lg p-6">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
-                  <i class="fas fa-chart-area mr-2 text-green-600"></i>
+              <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
+                  <i class="fas fa-chart-area mr-2 text-green-600 dark:text-green-400"></i>
                   Market Analysis
                 </h3>
                 <div class="prose prose-sm max-w-none">
-                  <p class="text-gray-700 whitespace-pre-line">{{ selectedAnalysis.analysis }}</p>
+                  <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ selectedAnalysis.analysis }}</p>
                 </div>
               </div>
 
               <!-- Timeframe Analysis -->
-              <div v-if="selectedAnalysis.timeframe_analysis && Array.isArray(selectedAnalysis.timeframe_analysis)" class="bg-white border rounded-lg p-6">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
-                  <i class="fas fa-clock mr-2 text-purple-600"></i>
+              <div v-if="selectedAnalysis.timeframe_analysis && Array.isArray(selectedAnalysis.timeframe_analysis)" class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
+                  <i class="fas fa-clock mr-2 text-purple-600 dark:text-purple-400"></i>
                   Timeframe Analysis
                 </h3>
                 <div class="space-y-4">
                   <div
                     v-for="tf in selectedAnalysis.timeframe_analysis"
                     :key="tf.timeframe"
-                    class="border-l-4 border-blue-500 pl-4"
+                    class="border-l-4 border-blue-500 dark:border-blue-400 pl-4"
                   >
-                    <h4 class="font-semibold text-gray-900">{{ tf.timeframe }}</h4>
-                    <p class="text-gray-600 text-sm">{{ tf.summary }}</p>
+                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ tf.timeframe }}</h4>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">{{ tf.summary }}</p>
                   </div>
                 </div>
               </div>
 
               <!-- Risk Assessment -->
-              <div class="bg-red-50 border border-red-200 rounded-lg p-6">
-                <h3 class="text-xl font-bold mb-4 text-red-800 flex items-center">
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 transition-colors duration-300">
+                <h3 class="text-xl font-bold mb-4 text-red-800 dark:text-red-400 flex items-center">
                   <i class="fas fa-exclamation-triangle mr-2"></i>
                   Risk Assessment
                 </h3>
                 <div class="prose prose-sm max-w-none">
-                  <p class="text-red-700 whitespace-pre-line">{{ selectedAnalysis.risks }}</p>
+                  <p class="text-red-700 dark:text-red-300 whitespace-pre-line">{{ selectedAnalysis.risks }}</p>
                 </div>
               </div>
 
               <!-- Technical Details -->
-              <div class="bg-gray-50 border rounded-lg p-6">
-                <h3 class="text-xl font-bold mb-4 flex items-center">
-                  <i class="fas fa-cog mr-2 text-gray-600"></i>
+              <div class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
+                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
+                  <i class="fas fa-cog mr-2 text-gray-600 dark:text-gray-400"></i>
                   Technical Details
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 class="font-medium text-gray-900 mb-2">Analysis Time</h4>
-                    <p class="text-sm text-gray-600">{{ formatDate(selectedAnalysis.created_at) }}</p>
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Analysis Time</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatDate(selectedAnalysis.created_at) }}</p>
                   </div>
                   <div>
-                    <h4 class="font-medium text-gray-900 mb-2">Confidence Level</h4>
-                    <p class="text-sm text-gray-600">{{ getConfidenceLevel(selectedAnalysis.confidence) }}</p>
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Confidence Level</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ getConfidenceLevel(selectedAnalysis.confidence) }}</p>
                   </div>
                   <div>
-                    <h4 class="font-medium text-gray-900 mb-2">Strategy Type</h4>
-                    <p class="text-sm text-gray-600">{{ getStrategyType(selectedAnalysis.strategy) }}</p>
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Strategy Type</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ getStrategyType(selectedAnalysis.strategy) }}</p>
                   </div>
                   <div>
-                    <h4 class="font-medium text-gray-900 mb-2">Timeframes Analyzed</h4>
-                    <p class="text-sm text-gray-600">{{ selectedAnalysis.timeframes?.length || 0 }} timeframes</p>
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Timeframes Analyzed</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ selectedAnalysis.timeframes?.length || 0 }} timeframes</p>
                   </div>
                 </div>
               </div>
@@ -381,12 +388,14 @@
 
 <script>
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 
 export default {
   name: 'ApiHistory',
   setup() {
     const authStore = useAuthStore()
+    const themeStore = useThemeStore()
     const analyses = ref([])
     const loading = ref(false)
     const error = ref('')
@@ -588,6 +597,7 @@ export default {
       showDetailModal,
       selectedAnalysis,
       authInitialized,
+      themeStore,
       uniqueSymbols,
       latestAnalysisDate,
       avgConfidence,

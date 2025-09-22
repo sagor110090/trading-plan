@@ -20,4 +20,9 @@ import { useApiKeyStore } from '@/stores/apiKey'
 const apiKeyStore = useApiKeyStore(pinia)
 apiKeyStore.init()
 
+// Initialize theme store
+import { useThemeStore } from '@/stores/theme'
+const themeStore = useThemeStore(pinia)
+themeStore.init()
+
 app.mount('#app')

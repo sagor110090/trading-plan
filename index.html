@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Multi-Timeframe Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .symbol-input {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            min-width: 200px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #3182ce;
+        }
+
+        .timeframes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .timeframe-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeframe-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d8, #96ceb4);
+        }
+
+        .timeframe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .timeframe-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .timeframe-symbol {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .price-display {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .signal-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .signal-bullish {
+            background-color: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .signal-bearish {
+            background-color: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+
+        .signal-reversal {
+            background-color: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        .indicator-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .indicator-value {
+            font-weight: bold;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-live {
+            background-color: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .status-updating {
+            background-color: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        .error-container {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #64748b;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" x-data="cryptoAnalyzer()" x-init="init()">
+        <div class="header">
+            <h1>Crypto Multi-Timeframe Analysis</h1>
+            <p>Real-time signals across 1m, 5m, and 15m timeframes</p>
+        </div>
+
+        <div class="controls">
+            <input
+                type="text"
+                x-model="symbol"
+                placeholder="Enter symbol (e.g., BTCUSDT)"
+                class="symbol-input"
+                @keyup.enter="updateData()"
+            >
+            <button class="btn" @click="updateData()">Update Data</button>
+            <button class="btn" @click="testBinanceDirect()" style="background-color: #d69e2e;">Test API Connection</button>
+        </div>
+
+        <div x-show="showError" class="error-container">
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle mr-2 mt-1"></i>
+                <div>
+                    <strong>Error:</strong> <span x-text="errorMessage"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading-spinner" x-show="isLoading">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+
+        <div class="timeframes-grid" x-show="!isLoading && hasData">
+            <template x-for="(tf, index) in timeframes" :key="index">
+                <div class="timeframe-card">
+                    <div class="status-badge" :class="tf.status === 'live' ? 'status-live' : 'status-updating'" x-text="tf.status"></div>
+
+                    <div class="timeframe-header">
+                        <div class="timeframe-title" x-text="tf.name"></div>
+                        <div class="timeframe-symbol" x-text="symbol"></div>
+                    </div>
+
+                    <div class="price-display" x-text="'$' + tf.price.toFixed(2)"></div>
+
+                    <div class="signal-indicator" :class="'signal-' + tf.signal.toLowerCase()">
+                        <i :class="getSignalIcon(tf.signal)" class="fas mr-2"></i>
+                        <span x-text="tf.signal"></span>
+                    </div>
+
+                    <div class="indicators">
+                        <div class="indicator-row">
+                            <span>RSI:</span>
+                            <span class="indicator-value" x-text="tf.rsi !== null ? tf.rsi.toFixed(1) : '-'"></span>
+                        </div>
+                        <div class="indicator-row">
+                            <span>MACD:</span>
+                            <span class="indicator-value" x-text="tf.macd !== null ? tf.macd.toFixed(3) : '-'"></span>
+                        </div>
+                        <div class="indicator-row">
+                            <span>EMA 20:</span>
+                            <span class="indicator-value" x-text="tf.ema20 !== null ? '$' + tf.ema20.toFixed(2) : '-'"></span>
+                        </div>
+                        <div class="indicator-row">
+                            <span>Volume:</span>
+                            <span class="indicator-value" x-text="formatNumber(tf.volume)"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="no-data" x-show="!isLoading && !hasData && !showError">
+            <p>No data available. Please enter a valid symbol and click Update.</p>
+        </div>
+    </div>
+
+    <script>
+        function cryptoAnalyzer() {
+            return {
+                symbol: 'BTCUSDT',
+                timeframes: [
+                    { name: '1m', price: 0, signal: '', rsi: null, macd: null, ema20: null, volume: 0, status: 'live' },
+                    { name: '5m', price: 0, signal: '', rsi: null, macd: null, ema20: null, volume: 0, status: 'live' },
+                    { name: '15m', price: 0, signal: '', rsi: null, macd: null, ema20: null, volume: 0, status: 'live' }
+                ],
+                isLoading: false,
+                hasData: false,
+                showError: false,
+                errorMessage: '',
+
+                init() {
+                    console.log('Initialized crypto analyzer');
+
+                    // Load cached data if available
+                    const cachedData = localStorage.getItem('cryptoData');
+                    if (cachedData) {
+                        try {
+                            const parsed = JSON.parse(cachedData);
+                            if (parsed.symbol === this.symbol) {
+                                this.timeframes = parsed.data;
+                                this.hasData = true;
+                                console.log('Loaded cached data for', this.symbol);
+                            }
+                        } catch (e) {
+                            console.warn('Invalid cached data:', e);
+                        }
+                    }
+
+                    this.updateData();
+                    // Auto-update every 30 seconds
+                    setInterval(() => this.autoUpdate(), 30000);
+                },
+
+                async updateData() {
+                    if (!this.symbol.trim()) return;
+
+                    this.isLoading = true;
+                    this.hasData = false;
+                    this.showError = false;
+
+                    try {
+                        console.log('Fetching data directly from Binance API');
+                        await this.fetchAllTimeframes();
+
+                        // Cache successful data
+                        localStorage.setItem('cryptoData', JSON.stringify({
+                            symbol: this.symbol,
+                            data: this.timeframes,
+                            timestamp: Date.now()
+                        }));
+
+                        this.hasData = true;
+                    } catch (error) {
+                        console.error("Failed to fetch data:", error);
+                        this.errorMessage = `Failed to fetch data: ${error.message}`;
+                        this.showError = true;
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                async fetchAllTimeframes() {
+                    try {
+                        const intervals = ['1m', '5m', '15m'];
+                        const promises = intervals.map(interval =>
+                            this.fetchKlines(this.symbol, interval)
+                        );
+
+                        const results = await Promise.all(promises);
+
+                        // Process results
+                        results.forEach((data, index) => {
+                            const tf = this.timeframes[index];
+                            tf.status = 'updating';
+
+                            if (data && data.length > 0) {
+                                // Extract the last candle
+                                const lastCandle = data[data.length - 1];
+                                tf.price = parseFloat(lastCandle[4]); // Close price
+                                tf.volume = parseFloat(lastCandle[5]);
+
+                                // Calculate indicators (simplified for demo)
+                                this.calculateIndicators(tf, data);
+                                this.determineSignal(tf);
+                            }
+
+                            tf.status = 'live';
+                        });
+                    } catch (error) {
+                        console.error('Error in fetchAllTimeframes:', error);
+                        throw error;
+                    }
+                },
+
+                async fetchKlines(symbol, interval) {
+                    const baseUrl = 'https://fapi.binance.com/fapi/v1/klines';
+                    const params = new URLSearchParams({
+                        symbol: symbol.toUpperCase(),
+                        interval: interval,
+                        limit: 100
+                    });
+
+                    const url = `${baseUrl}?${params}`;
+
+                    console.log(`Requesting ${interval} klines for ${symbol}`);
+                    console.log('Direct API URL:', url);
+
+                    try {
+                        const response = await fetch(url);
+
+                        console.log(`Response status for ${interval} klines:`, response.status, response.statusText);
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error(`HTTP error for ${interval} klines! status: ${response.status}, response:`, errorText);
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                        }
+
+                        const data = await response.json();
+                        console.log(`Successfully fetched ${interval} klines:`, data.length, 'candles');
+                        return data;
+                    } catch (error) {
+                        console.error(`Error fetching ${interval} klines:`, error);
+                        console.error('Error details:', {
+                            message: error.message,
+                            stack: error.stack,
+                            url: url
+                        });
+                        throw error;
+                    }
+                },
+
+                calculateIndicators(tf, data) {
+                    if (data.length < 20) return;
+
+                    // Calculate RSI
+                    const closes = data.slice(-14).map(candle => parseFloat(candle[4]));
+                    let gains = 0, losses = 0;
+
+                    for (let i = 1; i < closes.length; i++) {
+                        const diff = closes[i] - closes[i-1];
+                        if (diff > 0) gains += diff;
+                        else losses -= diff;
+                    }
+
+                    const avgGain = gains / 13;
+                    const avgLoss = losses / 13;
+                    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+                    tf.rsi = 100 - (100 / (1 + rs));
+
+                    // Calculate MACD
+                    const prices = data.slice(-26).map(candle => parseFloat(candle[4]));
+                    const ema12 = this.calculateEMA(prices, 12);
+                    const ema26 = this.calculateEMA(prices, 26);
+                    tf.macd = ema12 - ema26;
+
+                    // Calculate EMA 20
+                    tf.ema20 = this.calculateEMA(data.slice(-20).map(candle => parseFloat(candle[4])), 20);
+                },
+
+                calculateEMA(prices, period) {
+                    const k = 2 / (period + 1);
+                    let ema = prices[0];
+
+                    for (let i = 1; i < prices.length; i++) {
+                        ema = prices[i] * k + ema * (1 - k);
+                    }
+
+                    return ema;
+                },
+
+                determineSignal(tf) {
+                    if (tf.rsi === null || tf.macd === null) return;
+
+                    if (tf.rsi > 70 && tf.macd < 0) {
+                        tf.signal = 'Bearish';
+                    } else if (tf.rsi < 30 && tf.macd > 0) {
+                        tf.signal = 'Bullish';
+                    } else if (Math.abs(tf.macd) < 0.1 || (tf.rsi > 60 && tf.macd > 0)) {
+                        tf.signal = 'Reversal';
+                    } else {
+                        tf.signal = tf.macd >= 0 ? 'Bullish' : 'Bearish';
+                    }
+                },
+
+                getSignalIcon(signal) {
+                    switch(signal) {
+                        case 'Bullish': return 'fa-arrow-trend-up';
+                        case 'Bearish': return 'fa-arrow-trend-down';
+                        case 'Reversal': return 'fa-exchange-alt';
+                        default: return 'fa-chart-line';
+                    }
+                },
+
+                formatNumber(num) {
+                    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+                    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+                    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+                    return num.toString();
+                },
+
+                autoUpdate() {
+                    if (this.hasData && !this.isLoading) {
+                        this.updateData();
+                    }
+                },
+
+                // Test Binance API connection
+                async testBinanceDirect() {
+                    console.log('=== Testing Binance API connection ===');
+
+                    try {
+                        const baseUrl = 'https://fapi.binance.com/fapi/v1/klines';
+                        const params = new URLSearchParams({
+                            symbol: 'BTCUSDT',
+                            interval: '1m',
+                            limit: 5
+                        });
+
+                        const testUrl = `${baseUrl}?${params}`;
+                        console.log('Test URL:', testUrl);
+
+                        const response = await fetch(testUrl);
+                        console.log('Response status:', response.status);
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('✅ Binance API connection successful:', data.length, 'candles');
+                            alert('✅ Binance API connection successful! Check console for details.');
+                        } else {
+                            console.log('❌ Binance API failed with status:', response.status);
+                            alert('❌ Binance API failed with status: ' + response.status);
+                        }
+                    } catch (error) {
+                        console.log('❌ Binance API failed with error:', error.message);
+                        alert('❌ Binance API failed with error: ' + error.message);
+                    }
+
+                    console.log('=== Binance API connection test complete ===');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

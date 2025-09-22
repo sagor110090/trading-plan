@@ -31,87 +31,156 @@
         </div>
 
         <!-- Controls -->
-        <div class="flex flex-wrap justify-center items-center gap-4 mb-8">
-            <div class="relative" x-data="{ open: false }">
-                <div class="flex gap-2">
-                    <input
-                        type="text"
-                        x-model="symbol"
-                        placeholder="Enter symbol (e.g., BTCUSDT)"
-                        class="px-4 py-3 border-2 border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg min-w-[250px] transition-all"
-                        @keyup.enter="updateData()"
+        <div class="flex flex-col lg:flex-row justify-center items-center gap-4 mb-8">
+            <div class="flex flex-wrap justify-center items-center gap-4">
+                <div class="relative" x-data="{ open: false }">
+                    <div class="flex gap-2">
+                        <input
+                            type="text"
+                            x-model="symbol"
+                            placeholder="Enter symbol (e.g., BTCUSDT)"
+                            class="px-4 py-3 border-2 border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg min-w-[250px] transition-all"
+                            @keyup.enter="updateData()"
+                        >
+                        <button 
+                            @click="open = !open"
+                            class="px-4 py-3 bg-gray-100 border-2 border-l-0 border-gray-200 rounded-r-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <i class="fas fa-chevron-down text-gray-600"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Dropdown Menu -->
+                    <div 
+                        x-show="open" 
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 transform scale-95"
+                        x-transition:enter-end="opacity-100 transform scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 transform scale-100"
+                        x-transition:leave-end="opacity-0 transform scale-95"
+                        @click.away="open = false"
+                        class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[200px]"
                     >
-                    <button 
-                        @click="open = !open"
-                        class="px-4 py-3 bg-gray-100 border-2 border-l-0 border-gray-200 rounded-r-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        <i class="fas fa-chevron-down text-gray-600"></i>
-                    </button>
+                        <div class="py-2">
+                            <div class="px-4 py-2 text-sm text-gray-500 font-semibold border-b border-gray-100">
+                                Popular Symbols
+                            </div>
+                            <template x-for="crypto in popularCryptos" :key="crypto.symbol">
+                                <button
+                                    @click="symbol = crypto.symbol + 'USDT'; open = false; updateData()"
+                                    class="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors flex items-center justify-between group"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm"
+                                             :style="`background: ${crypto.color}`">
+                                            <span x-text="crypto.symbol.substring(0, 3)"></span>
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-gray-800" x-text="crypto.symbol"></div>
+                                            <div class="text-sm text-gray-500" x-text="crypto.name"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-400 group-hover:text-blue-600 transition-colors">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </div>
+                                </button>
+                            </template>
+                            <div class="px-4 py-2 text-sm text-gray-500 font-semibold border-t border-gray-100 mt-2">
+                                Quick Pairs
+                            </div>
+                            <template x-for="pair in quickPairs" :key="pair">
+                                <button
+                                    @click="symbol = pair; open = false; updateData()"
+                                    class="w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors text-sm text-gray-700 hover:text-blue-600"
+                                    x-text="pair"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Dropdown Menu -->
-                <div 
-                    x-show="open" 
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 transform scale-95"
-                    x-transition:enter-end="opacity-100 transform scale-100"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 transform scale-100"
-                    x-transition:leave-end="opacity-0 transform scale-95"
-                    @click.away="open = false"
-                    class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[200px]"
-                >
-                    <div class="py-2">
-                        <div class="px-4 py-2 text-sm text-gray-500 font-semibold border-b border-gray-100">
-                            Popular Symbols
+                <!-- Timeframe Selector -->
+                <div class="relative" x-data="{ open: false }">
+                    <button 
+                        @click="open = !open"
+                        class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2 min-w-[200px]"
+                    >
+                        <i class="fas fa-clock"></i>
+                        <span x-text="`Timeframes (${selectedTimeframes.length})`"></span>
+                        <i class="fas fa-chevron-down ml-auto"></i>
+                    </button>
+                    
+                    <!-- Timeframe Dropdown -->
+                    <div 
+                        x-show="open" 
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 transform scale-95"
+                        x-transition:enter-end="opacity-100 transform scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 transform scale-100"
+                        x-transition:leave-end="opacity-0 transform scale-95"
+                        @click.away="open = false"
+                        class="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                    >
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-semibold text-gray-800">Select Timeframes</h3>
+                                <button 
+                                    @click="selectAllTimeframes()"
+                                    class="text-sm text-blue-600 hover:text-blue-700"
+                                >
+                                    Select All
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+                                <template x-for="tf in availableTimeframes" :key="tf.interval">
+                                    <label class="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors">
+                                        <input 
+                                            type="checkbox" 
+                                            :value="tf.interval"
+                                            x-model="selectedTimeframes"
+                                            @change="updateTimeframes()"
+                                            class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                                        >
+                                        <div>
+                                            <div class="font-medium text-gray-800" x-text="tf.label"></div>
+                                            <div class="text-xs text-gray-500" x-text="tf.description"></div>
+                                        </div>
+                                    </label>
+                                </template>
+                            </div>
+                            
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <button 
+                                    @click="open = false; updateData()"
+                                    class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                                >
+                                    Apply & Update
+                                </button>
+                            </div>
                         </div>
-                        <template x-for="crypto in popularCryptos" :key="crypto.symbol">
-                            <button
-                                @click="symbol = crypto.symbol + 'USDT'; open = false; updateData()"
-                                class="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors flex items-center justify-between group"
-                            >
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm"
-                                         :style="`background: ${crypto.color}`">
-                                        <span x-text="crypto.symbol.substring(0, 3)"></span>
-                                    </div>
-                                    <div>
-                                        <div class="font-semibold text-gray-800" x-text="crypto.symbol"></div>
-                                        <div class="text-sm text-gray-500" x-text="crypto.name"></div>
-                                    </div>
-                                </div>
-                                <div class="text-sm text-gray-400 group-hover:text-blue-600 transition-colors">
-                                    <i class="fas fa-arrow-right"></i>
-                                </div>
-                            </button>
-                        </template>
-                        <div class="px-4 py-2 text-sm text-gray-500 font-semibold border-t border-gray-100 mt-2">
-                            Quick Pairs
-                        </div>
-                        <template x-for="pair in quickPairs" :key="pair">
-                            <button
-                                @click="symbol = pair; open = false; updateData()"
-                                class="w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors text-sm text-gray-700 hover:text-blue-600"
-                                x-text="pair"
-                            ></button>
-                        </template>
                     </div>
                 </div>
             </div>
-            <button 
-                @click="updateData()" 
-                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
-                :disabled="isLoading"
-            >
-                <i class="fas fa-sync-alt" :class="{ 'animate-spin': isLoading }"></i>
-                Update Data
-            </button>
-            <button 
-                @click="testBinanceDirect()" 
-                class="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
-            >
-                Test API Connection
-            </button>
+            
+            <div class="flex gap-4">
+                <button 
+                    @click="updateData()" 
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+                    :disabled="isLoading"
+                >
+                    <i class="fas fa-sync-alt" :class="{ 'animate-spin': isLoading }"></i>
+                    Update Data
+                </button>
+                <button 
+                    @click="testBinanceDirect()" 
+                    class="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+                >
+                    Test API Connection
+                </button>
+            </div>
         </div>
 
         <!-- Error Message -->
@@ -202,15 +271,30 @@
         function cryptoAnalyzer() {
             return {
                 symbol: 'BTCUSDT',
-                timeframes: [
-                    { name: '1m', price: 0, signal: '', rsi: null, macd: null, ema20: null, volume: 0, status: 'live' },
-                    { name: '5m', price: 0, signal: '', rsi: null, macd: null, ema20: null, volume: 0, status: 'live' },
-                    { name: '15m', price: 0, signal: '', rsi: null, macd: null, ema20: null, volume: 0, status: 'live' }
-                ],
+                timeframes: [],
                 isLoading: false,
                 hasData: false,
                 showError: false,
                 errorMessage: '',
+                
+                // Available timeframe options
+                availableTimeframes: [
+                    { interval: '1m', label: '1 Minute', description: 'Very short term' },
+                    { interval: '3m', label: '3 Minutes', description: 'Short term' },
+                    { interval: '5m', label: '5 Minutes', description: 'Short term' },
+                    { interval: '15m', label: '15 Minutes', description: 'Medium term' },
+                    { interval: '30m', label: '30 Minutes', description: 'Medium term' },
+                    { interval: '1h', label: '1 Hour', description: 'Long term' },
+                    { interval: '2h', label: '2 Hours', description: 'Long term' },
+                    { interval: '4h', label: '4 Hours', description: 'Very long term' },
+                    { interval: '6h', label: '6 Hours', description: 'Very long term' },
+                    { interval: '8h', label: '8 Hours', description: 'Very long term' },
+                    { interval: '12h', label: '12 Hours', description: 'Daily analysis' },
+                    { interval: '1d', label: '1 Day', description: 'Daily analysis' }
+                ],
+                
+                // Default selected timeframes
+                selectedTimeframes: ['1m', '5m', '15m'],
                 
                 // Popular cryptocurrencies data
                 popularCryptos: [
@@ -250,6 +334,9 @@
 
                 init() {
                     console.log('Initialized crypto analyzer');
+                    
+                    // Initialize timeframes from selected intervals
+                    this.updateTimeframes();
 
                     // Load cached data if available
                     const cachedData = localStorage.getItem('cryptoData');
@@ -257,6 +344,10 @@
                         try {
                             const parsed = JSON.parse(cachedData);
                             if (parsed.symbol === this.symbol) {
+                                // Restore selected timeframes if available
+                                if (parsed.selectedTimeframes) {
+                                    this.selectedTimeframes = parsed.selectedTimeframes;
+                                }
                                 this.timeframes = parsed.data;
                                 this.hasData = true;
                                 console.log('Loaded cached data for', this.symbol);
@@ -269,6 +360,25 @@
                     this.updateData();
                     // Auto-update every 30 seconds
                     setInterval(() => this.autoUpdate(), 30000);
+                },
+
+                // Update timeframes array based on selected intervals
+                updateTimeframes() {
+                    this.timeframes = this.selectedTimeframes.map(interval => ({
+                        name: interval,
+                        price: 0,
+                        signal: '',
+                        rsi: null,
+                        macd: null,
+                        ema20: null,
+                        volume: 0,
+                        status: 'live'
+                    }));
+                },
+
+                // Select all available timeframes
+                selectAllTimeframes() {
+                    this.selectedTimeframes = this.availableTimeframes.map(tf => tf.interval);
                 },
 
                 async updateData() {
@@ -285,6 +395,7 @@
                         // Cache successful data
                         localStorage.setItem('cryptoData', JSON.stringify({
                             symbol: this.symbol,
+                            selectedTimeframes: this.selectedTimeframes,
                             data: this.timeframes,
                             timestamp: Date.now()
                         }));
@@ -301,8 +412,7 @@
 
                 async fetchAllTimeframes() {
                     try {
-                        const intervals = ['1m', '5m', '15m'];
-                        const promises = intervals.map(interval =>
+                        const promises = this.selectedTimeframes.map(interval =>
                             this.fetchKlines(this.symbol, interval)
                         );
 

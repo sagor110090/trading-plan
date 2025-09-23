@@ -1,32 +1,63 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
     <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+    <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center">
-            <button
-              @click="$router.back()"
-              class="mr-4 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-            >
-              <i class="fas fa-arrow-left"></i>
-            </button>
-            <img 
-              src="/icons/logo.png" 
-              alt="Crypto Analyzer Logo" 
-              class="h-8 w-8 mr-3 rounded-lg"
-            >
-            <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Trading Calculator</h1>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center h-auto sm:h-16 py-3 sm:py-0">
+          <div class="flex items-center justify-between w-full sm:w-auto sm:justify-start">
+            <div class="flex items-center space-x-3">
+              <button
+                @click="$router.back()"
+                class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all flex-shrink-0"
+              >
+                <i class="fas fa-arrow-left"></i>
+              </button>
+              <img 
+                src="/icons/logo.png" 
+                alt="Crypto Analyzer Logo" 
+                class="h-6 w-6 sm:h-8 sm:w-8 rounded-lg flex-shrink-0"
+              >
+              <div class="min-w-0 flex-1">
+                <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
+                  Trading Calculator
+                </h1>
+                <p class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Professional trade analysis</p>
+              </div>
+            </div>
+
+            <!-- Mobile/Tablet Menu Button -->
+            <div class="lg:hidden">
+              <button
+                @click="showMobileMenu = !showMobileMenu"
+                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+              >
+                <i class="fas fa-bars text-lg"></i>
+              </button>
+            </div>
           </div>
-          
+
           <!-- Desktop Navigation -->
-          <div class="hidden md:flex items-center space-x-2 lg:space-x-4">
+          <div class="hidden lg:flex items-center space-x-2 mt-3 sm:mt-0">
             <button
               @click="$router.push('/')"
-              class="bg-gray-600 text-white px-3 lg:px-4 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm lg:text-base"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm font-medium shadow-sm"
             >
-              <i class="fas fa-home mr-1 lg:mr-2"></i>
-              <span class="hidden lg:inline">Home</span>
+              <i class="fas fa-home mr-2"></i>
+              Home
+            </button>
+            <button
+              @click="$router.push('/api-history')"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm font-medium shadow-sm"
+            >
+              <i class="fas fa-history mr-2"></i>
+              AI History
+            </button>
+            <button
+              @click="showApiModal = true"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm font-medium shadow-sm"
+            >
+              <i class="fas fa-key mr-2"></i>
+              API Keys
             </button>
             <button
               @click="themeStore.toggleTheme"
@@ -43,32 +74,38 @@
               <i class="fas fa-sign-out-alt"></i>
             </button>
           </div>
-
-          <!-- Mobile Menu Button -->
-          <div class="md:hidden">
-            <button
-              @click="showMobileMenu = !showMobileMenu"
-              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-            >
-              <i class="fas fa-bars text-xl"></i>
-            </button>
-          </div>
         </div>
       </div>
 
-      <!-- Mobile Menu -->
+      <!-- Mobile/Tablet Menu -->
       <div
         v-if="showMobileMenu"
-        class="md:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+        class="lg:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
       >
         <div class="px-4 py-3 space-y-2">
-          <button
-            @click="$router.push('/'); showMobileMenu = false"
-            class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm"
-          >
-            <i class="fas fa-home mr-2"></i>
-            Home
-          </button>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              @click="$router.push('/'); showMobileMenu = false"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm font-medium"
+            >
+              <i class="fas fa-home mr-1"></i>
+              Home
+            </button>
+            <button
+              @click="$router.push('/api-history'); showMobileMenu = false"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm font-medium"
+            >
+              <i class="fas fa-history mr-1"></i>
+              AI History
+            </button>
+            <button
+              @click="showApiModal = true; showMobileMenu = false"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm font-medium"
+            >
+              <i class="fas fa-key mr-1"></i>
+              API Keys
+            </button>
+          </div>
           <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
             <div class="flex items-center space-x-2">
               <button
@@ -96,12 +133,15 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Input Section -->
         <div class="space-y-6">
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-            <h2 class="text-xl font-semibold mb-6 text-gray-900 dark:text-white">Trade Parameters</h2>
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300">
+            <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white flex items-center">
+              <i class="fas fa-calculator mr-2 text-blue-600"></i>
+              Trade Parameters
+            </h2>
             
             <!-- Entry Price -->
             <div class="mb-6">
@@ -232,8 +272,13 @@
         <div class="space-y-6">
           <!-- Summary Cards -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-              <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Liquidation Price</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Liquidation Price</h3>
+                <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                  <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                </div>
+              </div>
               <p class="text-2xl font-bold" :class="liquidationPriceColor">
                 {{ formatCurrency(liquidationPrice) }}
               </p>
@@ -242,8 +287,13 @@
               </p>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-              <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Initial Margin</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Initial Margin</h3>
+                <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <i class="fas fa-wallet text-blue-600 dark:text-blue-400"></i>
+                </div>
+              </div>
               <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {{ formatCurrency(initialMargin) }}
               </p>
@@ -254,8 +304,11 @@
           </div>
 
           <!-- P&L Section -->
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-            <h3 class="text-xl font-semibold mb-6 text-gray-900 dark:text-white">Profit & Loss Analysis</h3>
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300">
+            <h3 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white flex items-center">
+              <i class="fas fa-chart-line mr-2 text-green-600"></i>
+              Profit & Loss Analysis
+            </h3>
             
             <!-- Take Profit P&L -->
             <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg transition-colors duration-300">
@@ -316,8 +369,11 @@
           </div>
 
           <!-- Additional Info -->
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-            <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Position Details</h3>
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300">
+            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center">
+              <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+              Position Details
+            </h3>
             <div class="space-y-3">
               <div class="flex justify-between">
                 <span class="text-gray-600 dark:text-gray-400">Position Size:</span>
@@ -340,17 +396,31 @@
         </div>
       </div>
     </main>
+
+    <!-- API Key Modal -->
+    <div
+      v-if="showApiModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto transition-colors duration-300">
+        <ApiKeyManager @close="showApiModal = false" />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
+import ApiKeyManager from '@/components/ApiKeyManager.vue'
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default {
   name: 'Calculator',
+  components: {
+    ApiKeyManager
+  },
   setup() {
     const authStore = useAuthStore()
     const themeStore = useThemeStore()
@@ -366,6 +436,9 @@ export default {
     
     // Mobile menu state
     const showMobileMenu = ref(false)
+    
+    // API Key modal state
+    const showApiModal = ref(false)
 
     // Auth initialization
     onMounted(async () => {
@@ -475,6 +548,9 @@ export default {
       
       // Mobile menu
       showMobileMenu,
+      
+      // API Key modal
+      showApiModal,
       
       // Calculations
       initialMargin,

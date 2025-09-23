@@ -23,18 +23,58 @@
               <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Your trading analysis records</p>
             </div>
           </div>
-          <div class="flex items-center space-x-2 sm:space-x-3 mt-3 sm:mt-0 w-full sm:w-auto justify-between sm:justify-start">
-            <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              {{ analyses.length }} {{ analyses.length === 1 ? 'analysis' : 'analyses' }}
-            </div>
-            <div class="flex items-center space-x-2">
+          <!-- Desktop Navigation -->
+          <div class="hidden lg:flex items-center space-x-2 mt-3 sm:mt-0">
+            <button
+              @click="$router.push('/')"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm font-medium shadow-sm"
+            >
+              <i class="fas fa-home mr-2"></i>
+              Home
+            </button>
+            <button
+              @click="showApiModal = true"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm font-medium shadow-sm"
+            >
+              <i class="fas fa-key mr-2"></i>
+              API Keys
+            </button>
+            <button
+              @click="$router.push('/calculator')"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm font-medium shadow-sm"
+            >
+              <i class="fas fa-calculator mr-2"></i>
+              Calculator
+            </button>
+            <div class="flex items-center space-x-2 ml-4 border-l border-gray-300 dark:border-gray-600 pl-4">
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{ analyses.length }} {{ analyses.length === 1 ? 'analysis' : 'analyses' }}
+              </div>
+              <button
+                @click="loadAnalyses"
+                :disabled="loading"
+                class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg text-sm font-medium flex items-center flex-shrink-0"
+              >
+                <i v-if="loading" class="fas fa-spinner animate-spin mr-2"></i>
+                <i v-else class="fas fa-sync mr-2"></i>
+                Refresh
+              </button>
               <button
                 @click="themeStore.toggleTheme"
-                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 p-2 sm:p-0"
+                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                 :title="themeStore.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
               >
                 <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
               </button>
+            </div>
+          </div>
+
+          <!-- Mobile/Tablet Menu Button and Counter -->
+          <div class="lg:hidden flex items-center justify-between w-full sm:w-auto mt-3 sm:mt-0">
+            <div class="flex items-center space-x-3">
+              <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {{ analyses.length }} {{ analyses.length === 1 ? 'analysis' : 'analyses' }}
+              </div>
               <button
                 @click="loadAnalyses"
                 :disabled="loading"
@@ -46,6 +86,66 @@
                 <span v-else class="hidden sm:inline">Refresh</span>
               </button>
             </div>
+            <button
+              @click="showMobileMenu = !showMobileMenu"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            >
+              <i class="fas fa-bars text-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile/Tablet Menu -->
+      <div
+        v-if="showMobileMenu"
+        class="lg:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+      >
+        <div class="px-4 py-3 space-y-2">
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              @click="$router.push('/'); showMobileMenu = false"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm font-medium"
+            >
+              <i class="fas fa-home mr-1"></i>
+              Home
+            </button>
+            <button
+              @click="showApiModal = true; showMobileMenu = false"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm font-medium"
+            >
+              <i class="fas fa-key mr-1"></i>
+              API Keys
+            </button>
+            <button
+              @click="$router.push('/calculator'); showMobileMenu = false"
+              class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm font-medium"
+            >
+              <i class="fas fa-calculator mr-1"></i>
+              Calculator
+            </button>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
+            <div class="flex items-center space-x-2">
+              <button
+                @click="themeStore.toggleTheme"
+                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                :title="themeStore.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+              >
+                <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
+              </button>
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                {{ themeStore.isDark ? 'Dark' : 'Light' }}
+              </span>
+            </div>
+            <button
+              @click="signOut(); showMobileMenu = false"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center"
+              title="Sign Out"
+            >
+              <i class="fas fa-sign-out-alt mr-2"></i>
+              <span class="text-sm">Sign Out</span>
+            </button>
           </div>
         </div>
       </div>
@@ -266,6 +366,9 @@
         :subtitle="selectedAnalysis ? `${selectedAnalysis.symbol} - ${formatDate(selectedAnalysis.created_at)}` : ''"
         title="AI Analysis Details"
       />
+
+      <!-- API Key Manager Modal -->
+      <ApiKeyManager v-model="showApiModal" />
     </main>
   </div>
 </template>
@@ -274,12 +377,15 @@
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import AIAnalysisModal from '@/components/AIAnalysisModal.vue'
+import ApiKeyManager from '@/components/ApiKeyManager.vue'
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'ApiHistory',
   components: {
-    AIAnalysisModal
+    AIAnalysisModal,
+    ApiKeyManager
   },
   setup() {
     const authStore = useAuthStore()
@@ -293,6 +399,9 @@ export default {
     const showDetailModal = ref(false)
     const selectedAnalysis = ref(null)
     const authInitialized = ref(false)
+    const showMobileMenu = ref(false)
+    const showApiModal = ref(false)
+    const router = useRouter()
 
     // Computed properties for stats
     const uniqueSymbols = computed(() => {
@@ -447,6 +556,11 @@ export default {
       })
     }
 
+    const signOut = () => {
+      authStore.signOut()
+      router.push('/login')
+    }
+
     // Watch for auth store initialization
     const checkAuthAndLoad = () => {
       if (authStore.supabase && authStore.userId) {
@@ -490,6 +604,8 @@ export default {
       showDetailModal,
       selectedAnalysis,
       authInitialized,
+      showMobileMenu,
+      showApiModal,
       themeStore,
       uniqueSymbols,
       latestAnalysisDate,
@@ -501,7 +617,8 @@ export default {
       getShortRecommendation,
       getConfidenceLevel,
       getStrategyType,
-      formatDate
+      formatDate,
+      signOut
     }
   }
 }

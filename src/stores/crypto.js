@@ -165,6 +165,62 @@ export const useCryptoStore = defineStore('crypto', {
             }
         },
 
+        // New method for smooth data updates without card reloading
+        async refreshData() {
+            if (!this.symbol.trim() || this.timeframes.length === 0) return
+
+            // Don't show loading state, just update the data silently
+            try {
+                const promises = this.selectedTimeframes.map(interval =>
+                    this.fetchKlines(this.symbol, interval)
+                )
+
+                const results = await Promise.all(promises)
+
+                // Process results - update only the data properties
+                results.forEach((data, index) => {
+                    const tf = this.timeframes[index]
+                    
+                    if (!tf) return
+                    
+                    // Briefly show updating status
+                    tf.status = 'updating'
+
+                    if (data && data.length > 0) {
+                        // Extract the last candle
+                        const lastCandle = data[data.length - 1]
+                        const newPrice = parseFloat(lastCandle[4]) // Close price
+                        const newVolume = parseFloat(lastCandle[5])
+
+                        // Update data properties without recreating the object
+                        tf.price = newPrice
+                        tf.volume = newVolume
+
+                        // Calculate indicators
+                        this.calculateIndicators(tf, data)
+                        this.determineSignal(tf)
+                    }
+
+                    // Return to live status after a brief delay
+                    setTimeout(() => {
+                        if (tf) tf.status = 'live'
+                    }, 500)
+                })
+
+                // Update cache
+                localStorage.setItem('cryptoData', JSON.stringify({
+                    symbol: this.symbol,
+                    selectedTimeframes: this.selectedTimeframes,
+                    data: this.timeframes,
+                    timestamp: Date.now()
+                }))
+
+            } catch (error) {
+                console.error('Error refreshing crypto data:', error)
+                // Don't show error for silent refresh
+            }
+        },
+
         async fetchAllTimeframes() {
             try {
                 // Ensure timeframes array matches selected timeframes
@@ -176,7 +232,7 @@ export const useCryptoStore = defineStore('crypto', {
 
                 const results = await Promise.all(promises)
 
-                // Process results
+                // Process results - update only the data properties without recreating objects
                 results.forEach((data, index) => {
                     const tf = this.timeframes[index]
                     
@@ -191,8 +247,12 @@ export const useCryptoStore = defineStore('crypto', {
                     if (data && data.length > 0) {
                         // Extract the last candle
                         const lastCandle = data[data.length - 1]
-                        tf.price = parseFloat(lastCandle[4]) // Close price
-                        tf.volume = parseFloat(lastCandle[5])
+                        const newPrice = parseFloat(lastCandle[4]) // Close price
+                        const newVolume = parseFloat(lastCandle[5])
+
+                        // Update price and volume smoothly
+                        tf.price = newPrice
+                        tf.volume = newVolume
 
                         // Calculate indicators (simplified for demo)
                         this.calculateIndicators(tf, data)
@@ -363,7 +423,7 @@ export const useCryptoStore = defineStore('crypto', {
 
         autoUpdate() {
             if (this.hasData && !this.isLoading) {
-                this.updateData()
+                this.refreshData() // Use smooth refresh instead of full update
             }
         },
 

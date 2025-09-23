@@ -3,31 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Crypto Multi-Timeframe Analyzer</title>
-
+    <meta name="description" content="Professional cryptocurrency trading analyzer with AI-powered signals, P&L calculator, and real-time market data">
+    <meta name="keywords" content="cryptocurrency, trading, bitcoin, ethereum, AI, signals, calculator, analysis">
+    <meta name="author" content="Crypto Analyzer">
+    <meta name="robots" content="index, follow">
+    
     <!-- PWA Meta Tags -->
+    <title>Crypto Analyzer - Professional Trading Tools</title>
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#3B82F6">
+    
+    <!-- Apple PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Crypto Analyzer">
+    
+    <!-- Microsoft PWA Meta Tags -->
     <meta name="msapplication-TileColor" content="#3B82F6">
     <meta name="msapplication-config" content="./browserconfig.xml">
-
+    
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167x167.png">
-
+    <link rel="apple-touch-icon" href="icons/web-app-manifest-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/web-app-manifest-192x192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/web-app-manifest-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/web-app-manifest-192x192.png">
+    
     <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
-    <link rel="shortcut icon" href="icons/icon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/logo.png">
+    <link rel="shortcut icon" href="icons/logo.png">
+    <link rel="apple-touch-icon" href="icons/logo.png">
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fapi.binance.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Security Meta Tags -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
 </head>
 <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+            
+            // Handle connection status
+            window.addEventListener('online', () => {
+                console.log('App is online');
+                // Notify all service worker clients
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'ONLINE' });
+                }
+            });
+            
+            window.addEventListener('offline', () => {
+                console.log('App is offline');
+                // Notify all service worker clients
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'OFFLINE' });
+                }
+            });
+        }
+    </script>
 </body>
 </html>

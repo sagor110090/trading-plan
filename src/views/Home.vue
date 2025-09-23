@@ -5,51 +5,162 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center">
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Crypto Analyzer</h1>
+            <img
+              src="/icons/logo.png"
+              alt="Crypto Analyzer Logo"
+              class="h-8 w-8 mr-3 rounded-lg"
+            >
+            <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Crypto Analyzer</h1>
           </div>
-          <div class="flex items-center space-x-4">
+
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center space-x-2 lg:space-x-4">
             <button
               @click="askAIForDecision"
-              class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all"
+              class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 lg:px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all text-sm lg:text-base"
             >
-              <i class="fas fa-robot mr-2"></i>
-              AI Analysis
+              <i class="fas fa-robot mr-1 lg:mr-2"></i>
+              <span class="hidden lg:inline">AI Analysis</span>
             </button>
             <button
               @click="showApiModal = true"
-              class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all"
+              class="bg-gray-600 text-white px-3 lg:px-4 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm lg:text-base"
             >
-              <i class="fas fa-key mr-2"></i>
-              API Keys
+              <i class="fas fa-key mr-1 lg:mr-2"></i>
+              <span class="hidden lg:inline">API Keys</span>
+            </button>
+            <button
+              @click="$router.push('/calculator')"
+              class="bg-gray-600 text-white px-3 lg:px-4 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm lg:text-base"
+            >
+              <i class="fas fa-calculator mr-1 lg:mr-2"></i>
+              <span class="hidden lg:inline">Calculator</span>
             </button>
             <button
               @click="$router.push('/api-history')"
-              class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all"
+              class="bg-gray-600 text-white px-3 lg:px-4 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm lg:text-base"
             >
-              <i class="fas fa-history mr-2"></i>
-              AI History
+              <i class="fas fa-history mr-1 lg:mr-2"></i>
+              <span class="hidden lg:inline">AI History</span>
+            </button>
+            <button
+              @click="refreshData"
+              :disabled="!hasData"
+              class="bg-green-600 text-white px-3 lg:px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm lg:text-base"
+              title="Refresh data without reloading cards"
+            >
+              <i class="fas fa-sync mr-1 lg:mr-2"></i>
+              <span class="hidden lg:inline">Refresh</span>
             </button>
             <button
               @click="updateData"
               :disabled="isLoading"
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              class="bg-blue-600 text-white px-3 lg:px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm lg:text-base"
+              title="Reload all data and cards"
             >
-              <i v-if="isLoading" class="fas fa-spinner animate-spin mr-2"></i>
-              <i v-else class="fas fa-sync mr-2"></i>
-              Update Data
+              <i v-if="isLoading" class="fas fa-spinner animate-spin mr-1 lg:mr-2"></i>
+              <i v-else class="fas fa-download mr-1 lg:mr-2"></i>
+              <span class="hidden lg:inline">Update Data</span>
             </button>
             <button
               @click="themeStore.toggleTheme"
-              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
               :title="themeStore.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
             >
               <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
             </button>
             <button
               @click="signOut"
-              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 ml-2"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+              title="Sign Out"
             >
               <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <div class="md:hidden">
+            <button
+              @click="showMobileMenu = !showMobileMenu"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            >
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div
+        v-if="showMobileMenu"
+        class="md:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+      >
+        <div class="px-4 py-3 space-y-2">
+          <button
+            @click="askAIForDecision(); showMobileMenu = false"
+            class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all flex items-center justify-center text-sm"
+          >
+            <i class="fas fa-robot mr-2"></i>
+            AI Analysis
+          </button>
+          <button
+            @click="showApiModal = true; showMobileMenu = false"
+            class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm"
+          >
+            <i class="fas fa-key mr-2"></i>
+            API Keys
+          </button>
+          <button
+            @click="$router.push('/calculator'); showMobileMenu = false"
+            class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm"
+          >
+            <i class="fas fa-calculator mr-2"></i>
+            Calculator
+          </button>
+          <button
+            @click="$router.push('/api-history'); showMobileMenu = false"
+            class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm"
+          >
+            <i class="fas fa-history mr-2"></i>
+            AI History
+          </button>
+          <button
+            @click="refreshData(); showMobileMenu = false"
+            :disabled="!hasData"
+            class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center text-sm"
+          >
+            <i class="fas fa-sync mr-2"></i>
+            Refresh Data
+          </button>
+          <button
+            @click="updateData(); showMobileMenu = false"
+            :disabled="isLoading"
+            class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center text-sm"
+          >
+            <i v-if="isLoading" class="fas fa-spinner animate-spin mr-2"></i>
+            <i v-else class="fas fa-download mr-2"></i>
+            Update Data
+          </button>
+          <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
+            <div class="flex items-center space-x-2">
+              <button
+                @click="themeStore.toggleTheme"
+                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                :title="themeStore.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+              >
+                <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
+              </button>
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                {{ themeStore.isDark ? 'Dark' : 'Light' }}
+              </span>
+            </div>
+            <button
+              @click="signOut(); showMobileMenu = false"
+              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center"
+              title="Sign Out"
+            >
+              <i class="fas fa-sign-out-alt mr-2"></i>
+              <span class="text-sm">Sign Out</span>
             </button>
           </div>
         </div>
@@ -216,105 +327,13 @@
     </main>
 
     <!-- AI Analysis Modal -->
-    <div
-      v-if="showAIModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto transition-colors duration-300">
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">AI Trading Analysis</h2>
-            <button
-              @click="showAIModal = false"
-              class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
-            >
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-
-          <div v-if="isAILoading" class="text-center py-8">
-            <i class="fas fa-robot animate-pulse-slow text-4xl text-purple-600 mb-4"></i>
-            <p class="text-gray-600 dark:text-gray-400">Analyzing market data...</p>
-          </div>
-
-          <div v-else-if="aiError" class="text-center py-8">
-            <i class="fas fa-exclamation-triangle text-4xl text-red-600 mb-4"></i>
-            <p class="text-gray-600 dark:text-gray-400">{{ aiError }}</p>
-          </div>
-
-          <div v-else-if="aiAnalysis" class="space-y-6">
-            <!-- Recommendation -->
-            <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-lg transition-colors duration-300">
-              <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Recommendation</h3>
-              <p class="text-lg font-medium text-gray-900 dark:text-white">{{ aiAnalysis.recommendation }}</p>
-              <p class="text-gray-600 dark:text-gray-400 mt-2">{{ aiAnalysis.confidence }}</p>
-            </div>
-
-            <!-- Strategy -->
-            <div v-if="aiAnalysis.strategy" class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
-              <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Trading Strategy</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Signal</h4>
-                  <div class="flex items-center space-x-2">
-                    <div
-                      class="w-8 h-8 rounded-full flex items-center justify-center"
-                      :class="getSignalColor() === 'green' ? 'bg-green-600' : 'bg-red-600'"
-                    >
-                      <i :class="['fas', getSignalIcon(), 'text-white text-sm']"></i>
-                    </div>
-                    <span
-                      :class="['font-bold', getSignalColor() === 'green' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400']"
-                    >
-                      {{ getSignalColor() === 'green' ? 'BUY SIGNAL' : 'SELL SIGNAL' }}
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Current Price</h4>
-                  <p class="font-medium text-gray-900 dark:text-white">${{ timeframes[0]?.price?.toFixed(2) || '0.00' }}</p>
-                </div>
-                <div>
-                  <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Risk</h4>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ calculateRiskPercentage() }}%</p>
-                </div>
-                <div>
-                  <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Target</h4>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ calculateTargetPercentage() }}%</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Analysis -->
-            <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
-              <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Market Analysis</h3>
-              <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ aiAnalysis.analysis }}</p>
-            </div>
-
-            <!-- Risks -->
-            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 transition-colors duration-300">
-              <h3 class="text-xl font-bold mb-4 text-red-800 dark:text-red-400">Risk Assessment</h3>
-              <p class="text-red-700 dark:text-red-300 whitespace-pre-line">{{ aiAnalysis.risks }}</p>
-            </div>
-
-            <!-- Timeframe Analysis -->
-            <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
-              <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Timeframe Analysis</h3>
-              <div class="space-y-4">
-                <div
-                  v-for="tf in aiAnalysis.timeframeAnalysis"
-                  :key="tf.timeframe"
-                  class="border-l-4 border-blue-500 dark:border-blue-400 pl-4"
-                >
-                  <h4 class="font-semibold text-gray-900 dark:text-white">{{ tf.timeframe }}</h4>
-                  <p class="text-gray-600 dark:text-gray-400">{{ tf.summary }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <AIAnalysisModal
+      v-model="showAIModal"
+      :analysis="aiAnalysis"
+      :loading="isAILoading"
+      :error="aiError"
+      title="AI Trading Analysis"
+    />
 
     <!-- API Key Modal -->
     <div
@@ -334,13 +353,15 @@ import { useCryptoStore } from '@/stores/crypto'
 import { useApiKeyStore } from '@/stores/apiKey'
 import { useThemeStore } from '@/stores/theme'
 import ApiKeyManager from '@/components/ApiKeyManager.vue'
+import AIAnalysisModal from '@/components/AIAnalysisModal.vue'
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default {
   name: 'Home',
   components: {
-    ApiKeyManager
+    ApiKeyManager,
+    AIAnalysisModal
   },
   setup() {
     const authStore = useAuthStore()
@@ -380,9 +401,17 @@ export default {
     // API Key modal state
     const showApiModal = ref(false)
 
-    onMounted(() => {
+    // Mobile menu state
+    const showMobileMenu = ref(false)
+
+    onMounted(async () => {
+      // Wait for auth to be initialized
+      if (!authStore.isInitialized) {
+        await authStore.init()
+      }
+
       // Check if user is authenticated
-      if (!isAuthenticated.value) {
+      if (!authStore.isAuthenticated) {
         router.push('/login')
         return
       }
@@ -396,6 +425,9 @@ export default {
       user,
       isAuthenticated,
       signOut: authStore.signOut,
+
+      // Auth store
+      authStore,
 
       // Theme store
       themeStore,
@@ -418,6 +450,7 @@ export default {
 
       // Crypto methods
       updateData: cryptoStore.updateData,
+      refreshData: cryptoStore.refreshData,
       askAIForDecision: cryptoStore.askAIForDecision,
       selectAllTimeframes: cryptoStore.selectAllTimeframes,
       updateTimeframes: cryptoStore.updateTimeframes,
@@ -429,7 +462,10 @@ export default {
       calculateTargetPercentage: cryptoStore.calculateTargetPercentage,
 
       // API Key modal
-      showApiModal
+      showApiModal,
+
+      // Mobile menu
+      showMobileMenu
     }
   }
 }

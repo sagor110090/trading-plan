@@ -11,6 +11,11 @@
             >
               <i class="fas fa-arrow-left"></i>
             </button>
+            <img 
+              src="/icons/logo.png" 
+              alt="Crypto Analyzer Logo" 
+              class="h-8 w-8 mr-3 rounded-lg"
+            >
             <div>
               <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 AI Analysis History
@@ -266,122 +271,12 @@
       </div>
 
       <!-- AI Analysis Detail Modal -->
-      <div
-        v-if="showDetailModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        @click="showDetailModal = false"
-      >
-        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto transition-colors duration-300" @click.stop>
-          <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-              <div>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">AI Analysis Details</h2>
-                <p class="text-gray-600 dark:text-gray-400">{{ selectedAnalysis?.symbol }} - {{ formatDate(selectedAnalysis?.created_at) }}</p>
-              </div>
-              <button
-                @click="showDetailModal = false"
-                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white text-2xl"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-
-            <div v-if="selectedAnalysis" class="space-y-6">
-              <!-- Recommendation Header -->
-              <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-lg transition-colors duration-300">
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white">Recommendation</h3>
-                  <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium rounded-full">
-                    {{ getConfidenceLevel(selectedAnalysis.confidence) }}
-                  </span>
-                </div>
-                <p class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ selectedAnalysis.recommendation }}</p>
-                <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                  <span><i class="fas fa-chart-line mr-1"></i> {{ selectedAnalysis.symbol }}</span>
-                  <span><i class="fas fa-dollar-sign mr-1"></i> ${{ selectedAnalysis.current_price?.toFixed(2) || 'N/A' }}</span>
-                </div>
-              </div>
-
-              <!-- Strategy Section -->
-              <div v-if="selectedAnalysis.strategy" class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
-                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-                  <i class="fas fa-chess-knight mr-2 text-blue-600 dark:text-blue-400"></i>
-                  Trading Strategy
-                </h3>
-                <div class="prose prose-sm max-w-none">
-                  <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ selectedAnalysis.strategy }}</p>
-                </div>
-              </div>
-
-              <!-- Market Analysis -->
-              <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
-                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-                  <i class="fas fa-chart-area mr-2 text-green-600 dark:text-green-400"></i>
-                  Market Analysis
-                </h3>
-                <div class="prose prose-sm max-w-none">
-                  <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ selectedAnalysis.analysis }}</p>
-                </div>
-              </div>
-
-              <!-- Timeframe Analysis -->
-              <div v-if="selectedAnalysis.timeframe_analysis && Array.isArray(selectedAnalysis.timeframe_analysis)" class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
-                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-                  <i class="fas fa-clock mr-2 text-purple-600 dark:text-purple-400"></i>
-                  Timeframe Analysis
-                </h3>
-                <div class="space-y-4">
-                  <div
-                    v-for="tf in selectedAnalysis.timeframe_analysis"
-                    :key="tf.timeframe"
-                    class="border-l-4 border-blue-500 dark:border-blue-400 pl-4"
-                  >
-                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ tf.timeframe }}</h4>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">{{ tf.summary }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Risk Assessment -->
-              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 transition-colors duration-300">
-                <h3 class="text-xl font-bold mb-4 text-red-800 dark:text-red-400 flex items-center">
-                  <i class="fas fa-exclamation-triangle mr-2"></i>
-                  Risk Assessment
-                </h3>
-                <div class="prose prose-sm max-w-none">
-                  <p class="text-red-700 dark:text-red-300 whitespace-pre-line">{{ selectedAnalysis.risks }}</p>
-                </div>
-              </div>
-
-              <!-- Technical Details -->
-              <div class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-6 transition-colors duration-300">
-                <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-                  <i class="fas fa-cog mr-2 text-gray-600 dark:text-gray-400"></i>
-                  Technical Details
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Analysis Time</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatDate(selectedAnalysis.created_at) }}</p>
-                  </div>
-                  <div>
-                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Confidence Level</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ getConfidenceLevel(selectedAnalysis.confidence) }}</p>
-                  </div>
-                  <div>
-                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Strategy Type</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ getStrategyType(selectedAnalysis.strategy) }}</p>
-                  </div>
-                  <div>
-                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Timeframes Analyzed</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ selectedAnalysis.timeframes?.length || 0 }} timeframes</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AIAnalysisModal
+        v-model="showDetailModal"
+        :analysis="selectedAnalysis"
+        :subtitle="selectedAnalysis ? `${selectedAnalysis.symbol} - ${formatDate(selectedAnalysis.created_at)}` : ''"
+        title="AI Analysis Details"
+      />
     </main>
   </div>
 </template>
@@ -389,10 +284,14 @@
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
+import AIAnalysisModal from '@/components/AIAnalysisModal.vue'
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 
 export default {
   name: 'ApiHistory',
+  components: {
+    AIAnalysisModal
+  },
   setup() {
     const authStore = useAuthStore()
     const themeStore = useThemeStore()
@@ -570,7 +469,12 @@ export default {
       }
     }
 
-    onMounted(() => {
+    onMounted(async () => {
+      // Wait for auth to be initialized
+      if (!authStore.isInitialized) {
+        await authStore.init()
+      }
+      
       // Initial check
       checkAuthAndLoad()
       

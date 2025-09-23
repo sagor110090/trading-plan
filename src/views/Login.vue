@@ -5,7 +5,7 @@
       <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-t-xl">
         <div class="text-center">
           <h1 class="text-3xl font-bold mb-2">Crypto Analyzer</h1>
-          <p class="text-blue-100">Please login to access the trading platform</p>
+          <p class="text-blue-100">Professional Trading Platform</p>
         </div>
       </div>
 
@@ -62,18 +62,6 @@
             <span v-else>Sign In</span>
           </button>
         </form>
-
-        <!-- Demo Mode Button -->
-        <div class="mt-6 text-center">
-          <p class="text-gray-600 text-sm mb-4">Don't have an account?</p>
-          <button
-            @click="useDemoMode"
-            :disabled="authLoading"
-            class="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            Try Demo Mode
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -115,10 +103,6 @@ export default {
       authStore.handleAuth()
     }
 
-    const useDemoMode = () => {
-      authStore.useDemoMode()
-    }
-
     return {
       user,
       authLoading,
@@ -126,8 +110,7 @@ export default {
       authEmail,
       authPassword,
       isAuthenticated,
-      handleAuth,
-      useDemoMode
+      handleAuth
     }
   }
 }

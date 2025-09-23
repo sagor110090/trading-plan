@@ -12,7 +12,8 @@ export const useAuthStore = defineStore('auth', {
         authEmail: '',
         authPassword: '',
         supabase: null,
-        session: null
+        session: null,
+        isInitialized: false
     }),
 
     getters: {
@@ -22,6 +23,8 @@ export const useAuthStore = defineStore('auth', {
 
     actions: {
         async init() {
+            this.isInitialized = false
+            
             // Initialize Supabase client
             this.supabase = createClient(supabaseUrl, supabaseKey)
             
@@ -30,6 +33,7 @@ export const useAuthStore = defineStore('auth', {
             
             if (error) {
                 console.error('Error getting session:', error)
+                this.isInitialized = true
                 return
             }
             
@@ -46,6 +50,8 @@ export const useAuthStore = defineStore('auth', {
                     localStorage.removeItem('cryptoData')
                 }
             })
+            
+            this.isInitialized = true
         },
 
         async handleAuth() {
@@ -132,6 +138,7 @@ export const useAuthStore = defineStore('auth', {
                 
                 this.authEmail = ''
                 this.authPassword = ''
+                this.isInitialized = true
             } catch (error) {
                 this.authError = error.message
             } finally {

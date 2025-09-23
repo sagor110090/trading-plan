@@ -2,12 +2,19 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
 import ApiHistory from '@/views/ApiHistory.vue'
+import Calculator from '@/views/Calculator.vue'
 
 const routes = [
     {
         path: '/',
         name: 'Home',
         component: Home,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/calculator',
+        name: 'Calculator',
+        component: Calculator,
         meta: { requiresAuth: true }
     },
     {

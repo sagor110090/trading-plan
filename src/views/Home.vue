@@ -32,14 +32,7 @@
 
           <!-- Desktop Navigation -->
           <div class="hidden lg:flex items-center space-x-2 mt-3 sm:mt-0">
-            <button
-              @click="askAIForDecision"
-              class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all text-sm font-medium shadow-sm"
-            >
-              <i class="fas fa-robot mr-2"></i>
-              AI Analysis
-            </button>
-            <button
+              <button
               @click="$router.push('/api-history')"
               class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all text-sm font-medium shadow-sm"
             >
@@ -88,7 +81,7 @@
               <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
             </button>
             <button
-              @click="signOut"
+              @click="handleSignOut"
               class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
               title="Sign Out"
             >
@@ -105,13 +98,6 @@
       >
         <div class="px-4 py-3 space-y-2">
           <div class="grid grid-cols-2 gap-2">
-            <button
-              @click="askAIForDecision(); showMobileMenu = false"
-              class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all flex items-center justify-center text-sm font-medium"
-            >
-              <i class="fas fa-robot mr-1"></i>
-              AI Analysis
-            </button>
             <button
               @click="showApiModal = true; showMobileMenu = false"
               class="bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center text-sm font-medium"
@@ -133,8 +119,6 @@
               <i class="fas fa-history mr-1"></i>
               AI History
             </button>
-          </div>
-          <div class="grid grid-cols-2 gap-2 pt-2">
             <button
               @click="refreshData(); showMobileMenu = false"
               :disabled="!hasData"
@@ -167,7 +151,7 @@
               </span>
             </div>
             <button
-              @click="signOut(); showMobileMenu = false"
+              @click="handleSignOut(); showMobileMenu = false"
               class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center"
               title="Sign Out"
             >
@@ -181,10 +165,12 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+
       <!-- Symbol Selection -->
       <div class="mb-6 sm:mb-8">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Trading Pair Analysis</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Select Trading Pair</h2>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
             <input
               v-model="symbol"
@@ -201,6 +187,15 @@
               <i v-if="isLoading" class="fas fa-spinner animate-spin mr-2"></i>
               <i v-else class="fas fa-chart-line mr-2"></i>
               Analyze
+            </button>
+            <button
+              @click="askAIForDecision"
+              :disabled="!hasData || isAILoading"
+              class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg font-medium"
+            >
+              <i v-if="isAILoading" class="fas fa-robot animate-spin mr-2"></i>
+              <i v-else class="fas fa-brain mr-2"></i>
+              Get AI Analysis
             </button>
           </div>
 
@@ -331,7 +326,7 @@
                 </span>
               </div>
             </div>
-            
+
             <div class="grid grid-cols-2 gap-4 mt-4">
               <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">RSI</p>
@@ -342,13 +337,72 @@
                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ tf.macd?.toFixed(4) || 'N/A' }}</p>
               </div>
             </div>
-            
+
             <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
               <div class="flex justify-between items-center">
                 <p class="text-xs text-gray-500 dark:text-gray-400">Volume</p>
                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ formatNumber(tf.volume) }}</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Analysis Preview -->
+      <div v-if="hasData && !isAILoading" class="mt-6 sm:mt-8 mb-6 sm:mb-8">
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl shadow-sm border border-green-200 dark:border-green-700 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <i class="fas fa-chart-line text-green-600 dark:text-green-400"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ready for AI Analysis</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Market data loaded for {{ symbol }}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Timeframes analyzed</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white">{{ timeframes.length }}</p>
+            </div>
+          </div>
+
+          <!-- Analysis Preview -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 text-center">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Current Price</p>
+              <p class="font-bold text-gray-900 dark:text-white">${{ timeframes[0]?.price?.toFixed(2) || 'N/A' }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 text-center">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Signals</p>
+              <p class="font-bold text-gray-900 dark:text-white">
+                {{ timeframes.filter(tf => tf.signal === 'Bullish').length }}B / {{ timeframes.filter(tf => tf.signal === 'Bearish').length }}S
+              </p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 text-center">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg RSI</p>
+              <p class="font-bold text-gray-900 dark:text-white">
+                {{ (timeframes.reduce((sum, tf) => sum + (tf.rsi || 0), 0) / timeframes.filter(tf => tf.rsi).length).toFixed(1) || 'N/A' }}
+              </p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 text-center">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Consensus</p>
+              <p class="font-bold text-gray-900 dark:text-white">
+                {{ timeframes.filter(tf => tf.signal === 'Bullish').length > timeframes.filter(tf => tf.signal === 'Bearish').length ? 'BULLISH' : 'BEARISH' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 text-center">
+            <button
+              @click="askAIForDecision"
+              :disabled="isAILoading"
+              class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg font-medium text-lg"
+            >
+              <i v-if="isAILoading" class="fas fa-robot animate-spin mr-2"></i>
+              <i v-else class="fas fa-brain mr-2"></i>
+              Get AI Trading Recommendation
+            </button>
           </div>
         </div>
       </div>
@@ -460,11 +514,18 @@ export default {
       cryptoStore.init()
     })
 
+    // Handle sign out with redirect
+    const handleSignOut = async () => {
+      await authStore.signOut()
+      router.push('/login')
+    }
+
     return {
       // Auth properties
       user,
       isAuthenticated,
       signOut: authStore.signOut,
+      handleSignOut,
 
       // Auth store
       authStore,

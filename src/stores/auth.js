@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { createClient } from '@supabase/supabase-js'
+import { useRouter } from 'vue-router'
 
 const supabaseUrl = 'https://xcuubslgdlitnnkgbnza.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdXVic2xnZGxpdG5ua2dibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1MjgyMTEsImV4cCI6MjA3NDEwNDIxMX0.bEh9_6uT8Mj0RZWcBeG17wC59DvLC8RKAmm7MzuAbvg'

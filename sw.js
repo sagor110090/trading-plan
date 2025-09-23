@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crypto-analyzer-v2';
+const CACHE_NAME = 'crypto-analyzer-v3';
 const URLS_TO_CACHE = [
   '/',
   '/index.html',

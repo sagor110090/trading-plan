@@ -3,46 +3,49 @@
     <!-- Header -->
     <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center h-auto sm:h-16 py-3 sm:py-0">
+          <div class="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
             <button
               @click="$router.back()"
-              class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+              class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all flex-shrink-0"
             >
               <i class="fas fa-arrow-left"></i>
             </button>
             <img 
               src="/icons/logo.png" 
               alt="Crypto Analyzer Logo" 
-              class="h-8 w-8 mr-3 rounded-lg"
+              class="h-6 w-6 sm:h-8 sm:w-8 rounded-lg flex-shrink-0"
             >
-            <div>
-              <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <div class="min-w-0 flex-1">
+              <h1 class="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
                 AI Analysis History
               </h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Your trading analysis records</p>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Your trading analysis records</p>
             </div>
           </div>
-          <div class="flex items-center space-x-3">
-            <div class="text-sm text-gray-500 dark:text-gray-400">
+          <div class="flex items-center space-x-2 sm:space-x-3 mt-3 sm:mt-0 w-full sm:w-auto justify-between sm:justify-start">
+            <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               {{ analyses.length }} {{ analyses.length === 1 ? 'analysis' : 'analyses' }}
             </div>
-            <button
-              @click="themeStore.toggleTheme"
-              class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-              :title="themeStore.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-            >
-              <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
-            </button>
-            <button
-              @click="loadAnalyses"
-              :disabled="loading"
-              class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
-            >
-              <i v-if="loading" class="fas fa-spinner animate-spin mr-2"></i>
-              <i v-else class="fas fa-sync mr-2"></i>
-              Refresh
-            </button>
+            <div class="flex items-center space-x-2">
+              <button
+                @click="themeStore.toggleTheme"
+                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 p-2 sm:p-0"
+                :title="themeStore.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+              >
+                <i :class="themeStore.isDark ? 'fas fa-sun' : 'fas fa-moon'"></i>
+              </button>
+              <button
+                @click="loadAnalyses"
+                :disabled="loading"
+                class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg text-sm sm:text-base flex items-center flex-shrink-0"
+              >
+                <i v-if="loading" class="fas fa-spinner animate-spin mr-1 sm:mr-2"></i>
+                <span v-else class="fas fa-sync mr-1 sm:mr-2"></span>
+                <span v-if="loading" class="hidden sm:inline">Loading...</span>
+                <span v-else class="hidden sm:inline">Refresh</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -151,27 +154,21 @@
       </div>
 
       <!-- AI Analyses Grid -->
-      <div v-if="analyses.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div v-if="analyses.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <div
           v-for="analysis in analyses"
           :key="analysis.id"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-300 overflow-hidden"
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-300 overflow-hidden"
         >
           <!-- Card Header -->
-          <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                  <span class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                    {{ analysis.symbol }}
-                  </span>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-gray-900 dark:text-white">{{ getShortRecommendation(analysis.recommendation) }}</h3>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(analysis.created_at) }}</p>
-                </div>
-              </div>
               <div class="flex items-center space-x-2">
+                <span class="text-base font-bold text-gray-900 dark:text-white">
+                  {{ analysis.symbol }}
+                </span>
+              </div>
+              <div class="flex items-center space-x-1">
                 <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
                   {{ getConfidenceLevel(analysis.confidence) }}
                 </span>
@@ -180,52 +177,44 @@
           </div>
           
           <!-- Card Content -->
-          <div class="p-6">
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Current Price</p>
-                <p class="text-lg font-bold text-gray-900 dark:text-white">${{ analysis.current_price?.toFixed(2) || 'N/A' }}</p>
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Recommendation</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ getShortRecommendation(analysis.recommendation) }}</p>
               </div>
-              <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Strategy</p>
-                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ getStrategyType(analysis.strategy) }}</p>
+              <div class="text-right">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Price</p>
+                <p class="text-sm font-bold text-gray-900 dark:text-white">${{ analysis.current_price?.toFixed(2) || 'N/A' }}</p>
               </div>
             </div>
             
-            <div class="space-y-3">
+            <div class="space-y-2">
               <div>
-                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Market Analysis</h4>
-                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">{{ analysis.analysis }}</p>
-              </div>
-              
-              <div>
-                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Risk Assessment</h4>
-                <p class="text-sm text-red-600 dark:text-red-400 leading-relaxed line-clamp-2">{{ analysis.risks }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Analysis</p>
+                <p class="text-xs text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">{{ analysis.analysis }}</p>
               </div>
             </div>
           </div>
           
           <!-- Card Footer -->
-          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-700">
+          <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <i class="fas fa-chart-line text-gray-400 dark:text-gray-500 text-xs"></i>
-                <span class="text-xs text-gray-500 dark:text-gray-400">{{ analysis.timeframes?.length || 0 }} timeframes analyzed</span>
-              </div>
-              <div class="flex items-center space-x-2">
+              <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(analysis.created_at) }}</span>
+              <div class="flex items-center space-x-1">
                 <button
                   @click="viewAnalysis(analysis)"
-                  class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                  title="View Full Analysis"
+                  class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
+                  title="View Analysis"
                 >
-                  <i class="fas fa-eye text-sm"></i>
+                  <i class="fas fa-eye text-xs"></i>
                 </button>
                 <button
                   @click="confirmDelete(analysis)"
-                  class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                  class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
                   title="Delete Analysis"
                 >
-                  <i class="fas fa-trash text-sm"></i>
+                  <i class="fas fa-trash text-xs"></i>
                 </button>
               </div>
             </div>
